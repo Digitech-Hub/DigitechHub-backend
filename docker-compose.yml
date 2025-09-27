@@ -1,0 +1,46 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: digitechhub-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword1234!@
+      MYSQL_USER: digitechhub_user
+      MYSQL_PASSWORD: user_pass1234!@
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+      - ./init-db:/docker-entrypoint-initdb.d   # 초기 스크립트 마운트
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - sso-net
+
+  redis:
+    image: redis:7.2
+    container_name: sso-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/data
+    networks:
+      - sso-net
+
+  # sso-server:
+  #   build: ./digitechhub-sso
+  #   container_name: sso-app
+  #   depends_on:
+  #     - mysql
+  #     - redis
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/digitechhub_sso
+  #     SPRING_DATASOURCE_USERNAME: digitechhub_user
+  #     SPRING_DATASOURCE_PASSWORD: user_pass1234!@
+  #     SPRING_REDIS_HOST: redis
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - sso-net
+
+networks:
+  sso-net:
+    driver: bridge
