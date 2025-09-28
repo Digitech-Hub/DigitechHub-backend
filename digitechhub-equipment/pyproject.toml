@@ -1,0 +1,18 @@
+[project]
+name = "digitechhub-equipment"
+version = "0.1.0"
+description = "Digigitech Hub Equipment Microservice API"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pymysql>=1.1.0",
+    "cryptography>=3.4.8",
+    "fastapi[standard]>=0.117.1",
+    "sqlalchemy>=2.0.43",
+    "uvicorn>=0.37.0",
+    "greenlet>=3.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+digitechhub-equipment = "app.main:main"

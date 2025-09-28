@@ -1,6 +1,6 @@
 -- 사용자 생성
-CREATE USER IF NOT EXISTS 'digitechhub_sso_user'@'%' IDENTIFIED BY 'digitechhub_sso!@!';
-CREATE USER IF NOT EXISTS 'digitechhub_equipment_user'@'%' IDENTIFIED BY 'digitechhub_equipment!@!1234';
+CREATE USER IF NOT EXISTS 'digitechhub_sso_user'@'%' IDENTIFIED BY 'digitechhub_sso!!';
+CREATE USER IF NOT EXISTS 'digitechhub_equipment_user'@'%' IDENTIFIED BY 'digitechhub_equipment!!1234';
 
 -- SSO 전용 DB  
 CREATE DATABASE IF NOT EXISTS digitechhub_sso CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
