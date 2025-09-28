@@ -2,3 +2,12 @@ mysql-data/
 redis-data/
 
 .DS_Store/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+.pytest_cache/
+.mypy_cache/
