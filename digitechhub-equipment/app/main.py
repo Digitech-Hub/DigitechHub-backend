@@ -178,7 +178,8 @@ def setup_middleware(app: FastAPI) -> None:
         Returns:
             Response: HTTP response object
         """
-        start_time = uvicorn.utils.time.time()
+        import time
+        start_time = time.time()
         
         # 요청 로깅
         logger.info(f"📥 {request.method} {request.url.path} - {request.client.host if request.client else 'unknown'}")
@@ -186,7 +187,7 @@ def setup_middleware(app: FastAPI) -> None:
         response = await call_next(request)
         
         # 응답 로깅
-        process_time = uvicorn.utils.time.time() - start_time
+        process_time = time.time() - start_time
         logger.info(f"📤 {request.method} {request.url.path} - {response.status_code} - {process_time:.4f}s")
         
         return response
