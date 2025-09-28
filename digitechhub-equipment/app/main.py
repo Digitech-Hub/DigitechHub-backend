@@ -16,9 +16,12 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.utils.logger import logger
 from app.utils.database import Base, engine
+from app.utils.response_factory import ResponseFactory
+from app.exceptions.handlers import setup_exception_handlers
 import app.models
 
 # 환경 변수 로드
@@ -87,6 +90,22 @@ def create_app() -> FastAPI:
     # 미들웨어 설정
     setup_middleware(app)
     
+    # 예외 핸들러 설정
+    setup_exception_handlers(app)
+    
+    # 404 핸들러 직접 등록
+    @app.exception_handler(404)
+    async def not_found_handler(request: Request, exc):
+        return JSONResponse(
+            status_code=404,
+            content={
+                "success": False,
+                "message": "리소스를 찾을 수 없습니다",
+                "data": None,
+                "error": "요청한 리소스를 찾을 수 없습니다"
+            }
+        )
+    
     return app
 
 
@@ -128,32 +147,41 @@ def setup_routers(app: FastAPI) -> None:
     
     # 기본 헬스체크 엔드포인트
     @app.get("/health", tags=["health"])
-    async def health_check() -> dict:
+    async def health_check():
         """
         애플리케이션 상태 확인 엔드포인트
         
         Returns:
-            dict: 상태 정보
+            JSONResponse: 표준화된 성공 응답
         """
-        return {
+        health_data = {
             "status": "healthy",
             "message": "DigiTech Hub Equipment API is running",
             "version": "0.1.0"
         }
+        return ResponseFactory.success(
+            data=health_data,
+            message="API가 정상적으로 실행 중입니다."
+        )
     
     @app.get("/", tags=["root"])
-    async def root() -> dict:
+    async def root():
         """
         루트 엔드포인트
         
         Returns:
-            dict: API 정보
+            JSONResponse: 표준화된 성공 응답
         """
-        return {
+        api_info = {
             "message": "Welcome to DigiTech Hub Equipment API",
             "docs": "/docs",
-            "health": "/health"
+            "health": "/health",
+            "version": "0.1.0"
         }
+        return ResponseFactory.success(
+            data=api_info,
+            message="DigiTech Hub Equipment API에 오신 것을 환영합니다."
+        )
     
     logger.info("✅ API routers configured successfully")
 
