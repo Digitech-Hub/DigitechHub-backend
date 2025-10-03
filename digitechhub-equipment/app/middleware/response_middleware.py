@@ -41,4 +41,4 @@ class ResponseMiddleware:
 def setup_response_middleware(app):
     """응답 미들웨어를 설정합니다."""
     app.add_middleware(ResponseMiddleware)
-    logger.info("✅ 간단한 응답 미들웨어가 성공적으로 설정되었습니다")
+    logger.info("✅ Successfully setup to middlwares.")

@@ -56,4 +56,4 @@ def setup_exception_handlers(app: FastAPI):
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
     app.add_exception_handler(Exception, general_exception_handler)
     
-    logger.info("✅ 예외 핸들러가 성공적으로 설정되었습니다")
+    logger.info("✅ Successfully setup to exception handlers")
