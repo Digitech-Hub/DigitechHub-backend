@@ -19,9 +19,27 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.utils.logger import logger
-from app.utils.database import Base, engine
+from app.utils.database import Base, sync_engine
 from app.utils.response_factory import ResponseFactory
 from app.exceptions.handlers import setup_exception_handlers
+from app.routers.equipment import router as equipment_router
+from app.schemas import (
+    RentEquipmentRequest,
+    ExtendRentalRequest,
+    ApiResponse,
+    SuccessResponse,
+    ErrorResponse,
+    ValidationErrorDetail,
+    ValidationErrorResponse,
+    RentalHistoryResponse,
+    EquipmentStatusInfo,
+    EquipmentInfoResponse,
+    RentalResponse,
+    UserRentalInfo,
+    UserRentalsResponse,
+    RentalDetailInfo,
+    RentalDetailResponse,
+)
 import app.models
 
 # 환경 변수 로드
@@ -33,7 +51,7 @@ def init_database():
     """
     try:
         logger.info("🔧 Initializing database tables...")
-        Base.metadata.create_all(bind=engine)
+        Base.metadata.create_all(bind=sync_engine)
         logger.info("✅ Database tables initialized successfully")
         return True
     except Exception as e:
@@ -73,12 +91,18 @@ def create_app() -> FastAPI:
     init_database()
     
     app = FastAPI(
-        title="DigiTech Hub Equipment API",
+        title="Digitech Hub Equipment API",
         description="장비 관리 시스템을 위한 마이크로서비스 API",
         version="0.1.0",
         docs_url="/docs",
         redoc_url="/redoc",
         lifespan=lifespan,
+        openapi_tags=[
+            {
+                "name": "Equipment Management",
+                "description": "장비 관리 관련 API 엔드포인트",
+            },
+        ],
     )
     
     # CORS 미들웨어 설정
@@ -92,6 +116,9 @@ def create_app() -> FastAPI:
     
     # 예외 핸들러 설정
     setup_exception_handlers(app)
+    
+    # 스키마 등록
+    register_schemas(app)
     
     # 404 핸들러 직접 등록
     @app.exception_handler(404)
@@ -141,49 +168,8 @@ def setup_routers(app: FastAPI) -> None:
     Args:
         app: FastAPI 애플리케이션 인스턴스
     """
-    # 향후 라우터 등록
-    # app.include_router(equipment_router, prefix="/api/v1/equipment", tags=["equipment"])
-    # app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
-    
-    # 기본 헬스체크 엔드포인트
-    @app.get("/health", tags=["health"])
-    async def health_check():
-        """
-        애플리케이션 상태 확인 엔드포인트
-        
-        Returns:
-            JSONResponse: 표준화된 성공 응답
-        """
-        health_data = {
-            "status": "healthy",
-            "message": "DigiTech Hub Equipment API is running",
-            "version": "0.1.0"
-        }
-        return ResponseFactory.success(
-            data=health_data,
-            message="API가 정상적으로 실행 중입니다."
-        )
-    
-    @app.get("/", tags=["root"])
-    async def root():
-        """
-        루트 엔드포인트
-        
-        Returns:
-            JSONResponse: 표준화된 성공 응답
-        """
-        api_info = {
-            "message": "Welcome to DigiTech Hub Equipment API",
-            "docs": "/docs",
-            "health": "/health",
-            "version": "0.1.0"
-        }
-        return ResponseFactory.success(
-            data=api_info,
-            message="DigiTech Hub Equipment API에 오신 것을 환영합니다."
-        )
-    
-    logger.info("✅ API routers configured successfully")
+    # 라우터 등록
+    app.include_router(equipment_router)
 
 
 def setup_middleware(app: FastAPI) -> None:
@@ -221,6 +207,60 @@ def setup_middleware(app: FastAPI) -> None:
         return response
     
     logger.info("✅ Middleware configured successfully")
+
+
+def register_schemas(app: FastAPI) -> None:
+    """
+    API 스키마들을 OpenAPI 문서에 등록
+    
+    Args:
+        app: FastAPI 애플리케이션 인스턴스
+    """
+    # OpenAPI 스키마에 모델들을 명시적으로 추가
+    openapi_schema = app.openapi()
+    
+    # 컴포넌트 섹션이 없으면 생성
+    if "components" not in openapi_schema:
+        openapi_schema["components"] = {}
+    
+    if "schemas" not in openapi_schema["components"]:
+        openapi_schema["components"]["schemas"] = {}
+    
+    # 스키마들을 명시적으로 등록
+    schemas_to_register = {
+        # 요청 스키마
+        "RentEquipmentRequest": RentEquipmentRequest,
+        "ExtendRentalRequest": ExtendRentalRequest,
+        # 기본 응답 스키마
+        "ApiResponse": ApiResponse,
+        "SuccessResponse": SuccessResponse,
+        "ErrorResponse": ErrorResponse,
+        "ValidationErrorDetail": ValidationErrorDetail,
+        "ValidationErrorResponse": ValidationErrorResponse,
+        # 도메인 응답 스키마
+        "RentalHistoryResponse": RentalHistoryResponse,
+        "EquipmentStatusInfo": EquipmentStatusInfo,
+        "EquipmentInfoResponse": EquipmentInfoResponse,
+        "RentalResponse": RentalResponse,
+        "UserRentalInfo": UserRentalInfo,
+        "UserRentalsResponse": UserRentalsResponse,
+        "RentalDetailInfo": RentalDetailInfo,
+        "RentalDetailResponse": RentalDetailResponse,
+    }
+    
+    for schema_name, schema_class in schemas_to_register.items():
+        try:
+            # Pydantic 모델의 JSON 스키마를 가져와서 등록
+            schema_dict = schema_class.model_json_schema()
+            openapi_schema["components"]["schemas"][schema_name] = schema_dict
+            logger.debug(f"✅ Registered schema: {schema_name}")
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to register schema {schema_name}: {e}")
+    
+    # OpenAPI 스키마 업데이트
+    app.openapi_schema = openapi_schema
+    
+    logger.info("✅ Schemas registered successfully in OpenAPI documentation")
 
 
 def main() -> None:

@@ -126,8 +126,8 @@ public class AuthService {
             cacheService.resetLoginAttempts(dto.getEmail());
             
             // JWT 토큰 생성
-            String accessToken = jwtService.generateToken(user.getEmail(), user.getRole());
-            String refreshToken = jwtService.generateRefreshToken(user.getEmail());
+            String accessToken = jwtService.generateToken(user.getEmail(), user.getId(), user.getRole());
+            String refreshToken = jwtService.generateRefreshToken(user.getEmail(), user.getId());
             
             // 마지막 로그인 시간 업데이트
             user.updateLastLogin();
@@ -236,7 +236,8 @@ public class AuthService {
             if (cachedResponse != null) {
                 // 캐시에서 조회된 경우 새로운 액세스 토큰만 생성
                 String newAccessToken = jwtService.generateToken(
-                        cachedResponse.getUser().getEmail(), 
+                        cachedResponse.getUser().getEmail(),
+                        cachedResponse.getUser().getId(),
                         cachedResponse.getUser().getRole()
                 );
                 
@@ -273,7 +274,7 @@ public class AuthService {
             }
             
             // 새로운 액세스 토큰 생성
-            String newAccessToken = jwtService.generateToken(user.getEmail(), user.getRole());
+            String newAccessToken = jwtService.generateToken(user.getEmail(), user.getId(), user.getRole());
             
             AuthResponseDTO.UserInfo userInfo = AuthResponseDTO.UserInfo.builder()
                     .id(user.getId())

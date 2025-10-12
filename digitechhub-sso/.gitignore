@@ -1,11 +1,11 @@
+# Maven
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-
-### STS ###
+# STS
 .apt_generated
 .classpath
 .factorypath
@@ -14,14 +14,13 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
+# IntelliJ IDEA
+.idea/
 *.iws
 *.iml
 *.ipr
-application.properties
 
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -31,5 +30,55 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
+# VS Code
 .vscode/
+
+# Spring Boot
+application.properties
+application-*.properties
+application.yml
+application-*.yml
+application-local.properties
+application-dev.properties
+application-prod.properties
+
+# 키 파일 (민감한 정보)
+keys/
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+
+# 환경 설정
+.env
+.env.local
+.env.development
+.env.production
+
+# 로그 파일
+*.log
+logs/
+log/
+
+# 운영체제
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 임시 파일
+*.tmp
+*.temp
+*~
+
+# 데이터베이스
+*.db
+*.sqlite3
+
+# 보안 관련
+secrets/
+credentials/

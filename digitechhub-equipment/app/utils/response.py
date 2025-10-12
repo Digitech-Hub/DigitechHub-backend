@@ -10,7 +10,6 @@ from fastapi import status
 from fastapi.responses import JSONResponse
 
 from app.schemas.response import (
-    ApiResponse,
     ErrorResponse,
     SuccessResponse,
     ValidationErrorDetail,

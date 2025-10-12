@@ -5,10 +5,12 @@
 """
 from .equipment import Equipment
 from .equipemnt_type import EquipmentType
+from .equipment_status import EquipmentStatus
 from .rental_history import RentalHistory
 
 __all__ = [
     "Equipment",
     "EquipmentType",
+    "EquipmentStatus",
     "RentalHistory",
 ]

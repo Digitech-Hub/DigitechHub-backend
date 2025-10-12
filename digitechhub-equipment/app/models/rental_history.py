@@ -38,6 +38,11 @@ class RentalHistory(AbstractBaseModel):
         server_default=func.now(),
         comment="대여 날짜"
     )
+    due_date: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        comment="대여 만료 날짜"
+    )
     return_date: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
         nullable=True,

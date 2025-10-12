@@ -2,7 +2,7 @@
 간단하고 세련된 응답 팩토리.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 from fastapi.responses import JSONResponse
 
 from app.schemas.response import create_success_response, create_error_response

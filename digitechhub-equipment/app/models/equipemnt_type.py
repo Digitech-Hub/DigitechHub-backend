@@ -63,22 +63,22 @@ class EquipmentType(AbstractBaseModel):
     @property
     def available_count(self) -> int:
         """사용 가능한 기자재 수 (계산된 값)"""
-        return len([eq for eq in self.equipments if eq.status == "available"])
+        return len([eq for eq in self.equipments if eq.equipment_status and eq.equipment_status.name == "available"])
     
     @property
     def broken_count(self) -> int:
         """고장난 기자재 수 (계산된 값)"""
-        return len([eq for eq in self.equipments if eq.status == "broken"])
+        return len([eq for eq in self.equipments if eq.equipment_status and eq.equipment_status.name == "broken"])
     
     @property
-    def checked_out_count(self) -> int:
+    def rented_count(self) -> int:
         """대여 중인 기자재 수 (계산된 값)"""
-        return len([eq for eq in self.equipments if eq.status == "checked_out"])
+        return len([eq for eq in self.equipments if eq.equipment_status and eq.equipment_status.name == "rented"])
     
     @property
-    def fix_count(self) -> int:
+    def maintenance_count(self) -> int:
         """수리 중인 기자재 수 (계산된 값)"""
-        return len([eq for eq in self.equipments if eq.status == "fixing"])
+        return len([eq for eq in self.equipments if eq.equipment_status and eq.equipment_status.name == "maintenance"])
     
     @property
     def total_rentals(self) -> int:

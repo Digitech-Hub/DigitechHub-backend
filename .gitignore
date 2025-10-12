@@ -1,7 +1,27 @@
+# 데이터베이스 데이터
 mysql-data/
 redis-data/
+minio-data/
 
+# 키 파일 (민감한 정보)
+keys/
+*.pem
+*.key
+*.p12
+*.jks
+
+# 환경 설정 파일
+.env
+.env.local
+.env.development
+.env.production
+
+# 운영체제 파일
 .DS_Store/
+.DS_Store
+Thumbs.db
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -11,3 +31,37 @@ __pycache__/
 .coverage
 .pytest_cache/
 .mypy_cache/
+*.egg-info/
+dist/
+build/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# 로그 파일
+*.log
+logs/
+
+# 임시 파일
+*.tmp
+*.temp
+*~
