@@ -19,7 +19,7 @@ from .response import (
 from .decorators import standardize_response, handle_errors
 
 # 데이터베이스 관련 유틸리티
-from .database import sync_engine, SessionLocal, Base, AsyncSessionLocal, async_engine
+from .database import Base, AsyncSessionLocal, async_engine
 from .dependencies import get_database, get_current_user
 
 # 로깅 유틸리티
@@ -42,8 +42,6 @@ __all__ = [
     "handle_errors",
     
     # 데이터베이스
-    "sync_engine",
-    "SessionLocal", 
     "Base",
     "AsyncSessionLocal",
     "async_engine",

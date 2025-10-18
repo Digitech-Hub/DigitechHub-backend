@@ -1,0 +1,182 @@
+_format_version: "3.0"
+_transform: true
+
+# 서비스 정의
+services:
+  # SSO 서비스
+  - name: sso-service
+    host: digitechhub-sso
+    port: 8080
+    protocol: http
+    path: /
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    routes:
+      - name: sso-auth-route
+        strip_path: false
+        paths:
+          - /api/auth
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        protocols:
+          - http
+          - https
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+            - PATCH
+          headers:
+            - Accept
+            - Accept-Version
+            - Content-Length
+            - Content-MD5
+            - Content-Type
+            - Date
+            - X-Auth-Token
+            - Authorization
+          exposed_headers:
+            - X-Auth-Token
+          credentials: true
+          max_age: 3600
+
+  # Equipment 서비스
+  - name: equipment-service
+    host: digitechhub-equipment
+    port: 3001
+    protocol: http
+    path: /
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    routes:
+      - name: equipment-route
+        strip_path: false
+        paths:
+          - /api/equipments
+        methods:
+          - GET
+          - POST
+          - PUT 
+          - DELETE
+          - OPTIONS
+          - PATCH
+          - HEAD
+        protocols:
+          - http
+          - https
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+            - PATCH
+          headers:
+            - Accept
+            - Accept-Version
+            - Content-Length
+            - Content-MD5
+            - Content-Type
+            - Date
+            - X-Auth-Token
+            - Authorization
+          exposed_headers:
+            - X-Auth-Token
+          credentials: true
+          max_age: 3600
+
+  # Meal 서비스
+  - name: meal-service
+    host: digitechhub-meal
+    port: 3000
+    protocol: http
+    path: /
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    routes:
+      - name: meal-route
+        strip_path: false
+        paths:
+          - /api/meals
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        protocols:
+          - http
+          - https
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+            - PATCH
+          headers:
+            - Accept
+            - Accept-Version
+            - Content-Length
+            - Content-MD5
+            - Content-Type
+            - Date
+            - X-Auth-Token
+            - Authorization
+          exposed_headers:
+            - X-Auth-Token
+          credentials: true
+          max_age: 3600
+
+# 전역 플러그인
+plugins:
+  # Rate Limiting
+  - name: rate-limiting
+    config:
+      minute: 100
+      hour: 1000
+      policy: local
+      fault_tolerant: true
+      hide_client_headers: false
+
+  # Request Size Limiting
+  - name: request-size-limiting
+    config:
+      allowed_payload_size: 10
+      size_unit: megabytes
+      require_content_length: false
+
+  # Request Transformer
+  - name: request-transformer
+    config:
+      add:
+        headers:
+          - "X-Forwarded-By: kong"
+          - "X-Gateway: digitechhub"

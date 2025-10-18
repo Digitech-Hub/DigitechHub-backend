@@ -10,20 +10,23 @@ services:
       - "3307:3306"
     volumes:
       - ./mysql-data:/var/lib/mysql
-      - ./init-db:/docker-entrypoint-initdb.d   # 초기 스크립트 마운트
-    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+      - ./init-db:/docker-entrypoint-initdb.d
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
     networks:
-      - sso-net
+      - digitechhub-net
 
   redis:
     image: redis:7.2
-    container_name: sso-redis
+    container_name: digitechhub-redis
     ports:
       - "6379:6379"
     volumes:
       - ./redis-data:/data
     networks:
-      - sso-net
+      - digitechhub-net
 
   minio:
     image: minio/minio:latest
@@ -31,14 +34,14 @@ services:
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin123
+    command: server /data --console-address ":9001"
     ports:
       - "9000:9000"
       - "9001:9001"
     volumes:
       - ./minio-data:/data
-    command: server /data --console-address ":9001"
     networks:
-      - sso-net
+      - digitechhub-net
 
   minio-init:
     image: minio/mc:latest
@@ -51,27 +54,144 @@ services:
       mc alias set myminio http://minio:9000 minioadmin minioadmin123;
       mc mb myminio/equipment --ignore-existing;
       mc anonymous set download myminio/equipment;
-      echo 'MinIO 버킷 초기화 완료';
+      echo '✅ MinIO 버킷 초기화 완료';
       "
     networks:
-      - sso-net
+      - digitechhub-net
 
-  # sso-server:
-  #   build: ./digitechhub-sso
-  #   container_name: sso-app
-  #   depends_on:
-  #     - mysql
-  #     - redis
-  #   environment:
-  #     SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/digitechhub_sso
-  #     SPRING_DATASOURCE_USERNAME: digitechhub_user
-  #     SPRING_DATASOURCE_PASSWORD: user_pass1234!@
-  #     SPRING_REDIS_HOST: redis
-  #   ports:
-  #     - "8080:8080"
-  #   networks:
-  #     - sso-net
+  # SSO 서비스
+  digitechhub-sso:
+    build:
+      context: ./digitechhub-sso
+      dockerfile: Dockerfile
+    container_name: digitechhub-sso
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://digitechhub-mysql:3306/digitechhub_sso?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: digitechhub_sso_user
+      SPRING_DATASOURCE_PASSWORD: digitechhub_sso!!
+      SPRING_REDIS_HOST: digitechhub-redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      APP_DOMAIN: ${DOMAIN_URL:-http://localhost:8080}
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-key-here-change-in-production}
+      JWT_EXPIRATION: 86400000
+      APP_FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      JWT_PRIVATE_KEY_PATH: /app/keys/private_key.pem
+      JWT_PUBLIC_KEY_PATH: /app/keys/public_key.pem
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keys:/app/keys:ro
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - digitechhub-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/auth/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  digitechhub-meal:
+    build:
+      context: ./digitechhub-meal
+      dockerfile: Dockerfile
+    container_name: digitechhub-meal
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DATABASE_URL: mysql://digitechhub_meal_user:digitechhub_meal1234@digitechhub-mysql:3306/digitechhub_meal
+      REDIS_HOST: digitechhub-redis
+      REDIS_PORT: 6379
+      NEIS_API_KEY: ${NEIS_API_KEY:-}
+      NEIS_API_URL: https://open.neis.go.kr/hub/mealServiceDietInfo
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - digitechhub-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/meals/today"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Equipment 서비스
+  digitechhub-equipment:
+    build:
+      context: ./digitechhub-equipment
+      dockerfile: Dockerfile
+    container_name: digitechhub-equipment
+    environment:
+      DATABASE_URL: mysql+aiomysql://digitechhub_equipment_user:digitechhub_equipment!!1234@digitechhub-mysql:3306/digitechhub_equipment
+      REDIS_HOST: digitechhub-redis
+      REDIS_PORT: 6379
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./keys/public_key.pem:/app/keys/public_key.pem:ro
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - digitechhub-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/equipments/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Kong Gateway (DB-less 모드)
+  kong:
+    image: kong:3.4
+    container_name: kong-gateway
+    platform: linux/amd64
+    depends_on:
+      - digitechhub-sso
+      - digitechhub-meal
+      - digitechhub-equipment
+    environment:
+      # DB-less 모드 설정
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /usr/local/kong/kong.yml
+      
+      # 로그 설정
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_LOG_LEVEL: info
+      
+      # Admin API 설정
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      
+      # Proxy 설정
+      KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
+    ports:
+      - "8000:8000"  # Public Gateway
+      - "8443:8443"  # Public Gateway (HTTPS)
+      - "8001:8001"  # Admin API
+    volumes:
+      - ./kong/kong.yml:/usr/local/kong/kong.yml:ro
+    networks:
+      - digitechhub-net
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 networks:
-  sso-net:
+  digitechhub-net:
     driver: bridge
