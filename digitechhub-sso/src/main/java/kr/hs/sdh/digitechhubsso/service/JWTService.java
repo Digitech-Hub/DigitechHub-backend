@@ -4,7 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import kr.hs.sdh.digitechhubsso.model.Role;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -27,15 +27,15 @@ public class JWTService {
     @Value("${jwt.refresh-expiration}")
     private long jwtRefreshExpiration;
 
-    @Value("${jwt.private-key-path:keys/private_key.pem}")
+    @Value("${jwt.private-key-path:/app/keys/private_key.pem}")
     private String privateKeyPath;
 
-    @Value("${jwt.public-key-path:keys/public_key.pem}")
+    @Value("${jwt.public-key-path:/app/keys/public_key.pem}")
     private String publicKeyPath;
 
     private PrivateKey getPrivateKey() {
         try {
-            ClassPathResource resource = new ClassPathResource(privateKeyPath);
+            FileSystemResource resource = new FileSystemResource(privateKeyPath);
             byte[] keyBytes = Files.readAllBytes(resource.getFile().toPath());
             
             String privateKeyContent = new String(keyBytes)
@@ -55,7 +55,7 @@ public class JWTService {
 
     private PublicKey getPublicKey() {
         try {
-            ClassPathResource resource = new ClassPathResource(publicKeyPath);
+            FileSystemResource resource = new FileSystemResource(publicKeyPath);
             byte[] keyBytes = Files.readAllBytes(resource.getFile().toPath());
             
             String publicKeyContent = new String(keyBytes)

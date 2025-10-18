@@ -23,6 +23,12 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
 # PyInstaller
 *.manifest
 *.spec

@@ -5,7 +5,7 @@ Equipment 서비스
 """
 
 import datetime
-from sqlalchemy import text
+from sqlalchemy import text, select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Equipment, RentalHistory, EquipmentStatus
@@ -40,11 +40,10 @@ class EquipmentService:
         Returns:
             list[dict]: 공개된 기자재 목록
         """
-        from sqlalchemy import or_
         from app.models.equipemnt_type import EquipmentType
 
         # 기본 쿼리: is_public이 True인 기자재들만 조회
-        base_query = session.query(Equipment).filter(Equipment.is_public == True)
+        base_query = select(Equipment).where(Equipment.is_public == True)
 
         # query 매개변수가 있으면 검색 필터 적용
         if query and query.strip():
@@ -52,15 +51,16 @@ class EquipmentService:
                 Equipment.alias.contains(query.strip()),
                 Equipment.info_comment.contains(query.strip()),
             )
-            base_query = base_query.filter(query_filter)
+            base_query = base_query.where(query_filter)
 
         # category 매개변수가 있으면 카테고리 필터 적용
         if category and category.strip():
-            base_query = base_query.join(EquipmentType).filter(
+            base_query = base_query.join(EquipmentType).where(
                 EquipmentType.name == category.strip()
             )
 
-        results = await base_query.all()
+        result = await session.execute(base_query)
+        results = result.scalars().all()
         equipment_list = []
 
         for eq in results:
@@ -95,11 +95,12 @@ class EquipmentService:
         Returns:
             dict: 조회된 기자재
         """
-        result = await (
-            session.query(Equipment)
-            .filter(Equipment.is_public == True and Equipment.id == equipment_id)
-            .first()
+        query = select(Equipment).where(
+            Equipment.is_public == True,
+            Equipment.id == equipment_id
         )
+        result = await session.execute(query)
+        result = result.scalar_one_or_none()
 
         if not result:
             raise NotFoundException(
@@ -144,11 +145,12 @@ class EquipmentService:
         Returns:
             dict: 대여된 기자재, 대여 성공 여부
         """
-        db_equipment = await (
-            session.query(Equipment)
-            .filter(Equipment.is_public == True and Equipment.id == equipment_id)
-            .first()
+        query = select(Equipment).where(
+            Equipment.is_public == True,
+            Equipment.id == equipment_id
         )
+        result = await session.execute(query)
+        db_equipment = result.scalar_one_or_none()
 
         if not db_equipment:
             raise NotFoundException(
@@ -174,14 +176,12 @@ class EquipmentService:
             )
 
         # 기자재가 이미 대여 중인지 확인
-        active_rental = await (
-            session.query(RentalHistory)
-            .filter(
-                RentalHistory.equipment_id == equipment_id,
-                RentalHistory.is_returned == False,
-            )
-            .first()
+        rental_query = select(RentalHistory).where(
+            RentalHistory.equipment_id == equipment_id,
+            RentalHistory.is_returned == False,
         )
+        rental_result = await session.execute(rental_query)
+        active_rental = rental_result.scalar_one_or_none()
 
         if active_rental:
             raise ValidationException(
@@ -221,11 +221,9 @@ class EquipmentService:
         )
 
         # 기자재 상태를 'rented'로 업데이트
-        rented_status = await (
-            session.query(EquipmentStatus)
-            .filter(EquipmentStatus.name == "rented")
-            .first()
-        )
+        status_query = select(EquipmentStatus).where(EquipmentStatus.name == "rented")
+        status_result = await session.execute(status_query)
+        rented_status = status_result.scalar_one_or_none()
         if not rented_status:
             raise ValidationException(
                 message="대여 상태를 찾을 수 없습니다",
@@ -280,13 +278,12 @@ class EquipmentService:
             dict: 대여 중인 기자재 목록과 상세 정보
         """
         # 현재 대여 중인 기자재 이력 조회 (반납되지 않은 것들)
-        db_rental_histories = await (
-            session.query(RentalHistory)
-            .filter(
-                RentalHistory.user_id == user_id, RentalHistory.is_returned == False
-            )
-            .all()
+        rental_query = select(RentalHistory).where(
+            RentalHistory.user_id == user_id,
+            RentalHistory.is_returned == False
         )
+        rental_result = await session.execute(rental_query)
+        db_rental_histories = rental_result.scalars().all()
 
         if not db_rental_histories:
             return {
@@ -374,13 +371,11 @@ class EquipmentService:
             dict: 대여 이력 목록
         """
         # 사용자의 모든 대여 이력 조회 (최신순)
-        db_rental_histories = await (
-            session.query(RentalHistory)
-            .filter(RentalHistory.user_id == user_id)
-            .order_by(RentalHistory.rental_date.desc())
-            .limit(limit)
-            .all()
-        )
+        rental_query = select(RentalHistory).where(
+            RentalHistory.user_id == user_id
+        ).order_by(RentalHistory.rental_date.desc()).limit(limit)
+        rental_result = await session.execute(rental_query)
+        db_rental_histories = rental_result.scalars().all()
 
         if not db_rental_histories:
             return {

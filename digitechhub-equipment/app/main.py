@@ -19,8 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.utils.logger import logger
-from app.utils.database import Base, sync_engine
-from app.utils.response_factory import ResponseFactory
+from app.utils.database import Base, async_engine
 from app.exceptions.handlers import setup_exception_handlers
 from app.routers.equipment import router as equipment_router
 from app.schemas import (
@@ -40,10 +39,10 @@ from app.schemas import (
     RentalDetailInfo,
     RentalDetailResponse,
 )
-import app.models
 
 # 환경 변수 로드
 load_dotenv()
+
 
 def init_database():
     """
@@ -51,7 +50,7 @@ def init_database():
     """
     try:
         logger.info("🔧 Initializing database tables...")
-        Base.metadata.create_all(bind=sync_engine)
+        Base.metadata.create_all(bind=async_engine)
         logger.info("✅ Database tables initialized successfully")
         return True
     except Exception as e:
@@ -64,18 +63,18 @@ def init_database():
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     애플리케이션 생명주기 관리
-    
+
     시작 시: 데이터베이스 초기화
     종료 시: 리소스 정리
     """
     # Startup
     logger.info("🚀 Starting Digitech Hub Equipment API...")
-    
+
     # 데이터베이스 초기화
     init_database()
-    
+
     yield
-    
+
     # Shutdown
     logger.info("🛑 Shutting down DigiTech Hub Equipment API...")
 
@@ -83,13 +82,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 def create_app() -> FastAPI:
     """
     FastAPI 애플리케이션 인스턴스 생성 및 설정
-    
+
     Returns:
         FastAPI: 설정된 FastAPI 애플리케이션 인스턴스
     """
     # 데이터베이스 초기화 (create_app 시점에서도 실행)
     init_database()
-    
+
     app = FastAPI(
         title="Digitech Hub Equipment API",
         description="장비 관리 시스템을 위한 마이크로서비스 API",
@@ -104,22 +103,22 @@ def create_app() -> FastAPI:
             },
         ],
     )
-    
+
     # CORS 미들웨어 설정
     setup_cors_middleware(app)
-    
+
     # 라우터 등록 (향후 확장용)
     setup_routers(app)
-    
+
     # 미들웨어 설정
     setup_middleware(app)
-    
+
     # 예외 핸들러 설정
     setup_exception_handlers(app)
-    
+
     # 스키마 등록
     register_schemas(app)
-    
+
     # 404 핸들러 직접 등록
     @app.exception_handler(404)
     async def not_found_handler(request: Request, exc):
@@ -129,17 +128,17 @@ def create_app() -> FastAPI:
                 "success": False,
                 "message": "리소스를 찾을 수 없습니다",
                 "data": None,
-                "error": "요청한 리소스를 찾을 수 없습니다"
-            }
+                "error": "요청한 리소스를 찾을 수 없습니다",
+            },
         )
-    
+
     return app
 
 
 def setup_cors_middleware(app: FastAPI) -> None:
     """
     CORS 미들웨어 설정
-    
+
     Args:
         app: FastAPI 애플리케이션 인스턴스
     """
@@ -148,7 +147,7 @@ def setup_cors_middleware(app: FastAPI) -> None:
         "http://localhost:8080",  # Vue 개발 서버
         "https://digitech-hub.com",  # 프로덕션 도메인
     ]
-    
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
@@ -157,14 +156,14 @@ def setup_cors_middleware(app: FastAPI) -> None:
         allow_headers=["*"],
         expose_headers=["*"],
     )
-    
+
     logger.info("✅ CORS middleware configured successfully")
 
 
 def setup_routers(app: FastAPI) -> None:
     """
     API 라우터 등록
-    
+
     Args:
         app: FastAPI 애플리케이션 인스턴스
     """
@@ -175,57 +174,62 @@ def setup_routers(app: FastAPI) -> None:
 def setup_middleware(app: FastAPI) -> None:
     """
     추가 미들웨어 설정
-    
+
     Args:
         app: FastAPI 애플리케이션 인스턴스
     """
-    
+
     @app.middleware("http")
     async def log_requests(request: Request, call_next) -> Response:
         """
         요청 로깅 미들웨어
-        
+
         Args:
             request: HTTP request object
             call_next: Next middleware/handler
-            
+
         Returns:
             Response: HTTP response object
         """
         import time
+
         start_time = time.time()
-        
+
         # 요청 로깅
-        logger.info(f"📥 {request.method} {request.url.path} - {request.client.host if request.client else 'unknown'}")
-        
+        logger.info(
+            f"📥 {request.method} {request.url.path} - {request.client.host if request.client else 'unknown'}"
+        )
+
         response = await call_next(request)
-        
+
         # 응답 로깅
         process_time = time.time() - start_time
-        logger.info(f"📤 {request.method} {request.url.path} - {response.status_code} - {process_time:.4f}s")
-        
+        logger.info(
+            f"📤 {request.method} {request.url.path} - {response.status_code} - {process_time:.4f}s"
+        )
+
         return response
-    
+
     logger.info("✅ Middleware configured successfully")
 
 
 def register_schemas(app: FastAPI) -> None:
     """
     API 스키마들을 OpenAPI 문서에 등록
-    
+
     Args:
         app: FastAPI 애플리케이션 인스턴스
     """
     # OpenAPI 스키마에 모델들을 명시적으로 추가
     openapi_schema = app.openapi()
-    
+
     # 컴포넌트 섹션이 없으면 생성
     if "components" not in openapi_schema:
         openapi_schema["components"] = {}
-    
+
     if "schemas" not in openapi_schema["components"]:
         openapi_schema["components"]["schemas"] = {}
-    
+
     # 스키마들을 명시적으로 등록
     schemas_to_register = {
         # 요청 스키마
@@ -247,7 +251,7 @@ def register_schemas(app: FastAPI) -> None:
         "RentalDetailInfo": RentalDetailInfo,
         "RentalDetailResponse": RentalDetailResponse,
     }
-    
+
     for schema_name, schema_class in schemas_to_register.items():
         try:
             # Pydantic 모델의 JSON 스키마를 가져와서 등록
@@ -256,34 +260,34 @@ def register_schemas(app: FastAPI) -> None:
             logger.debug(f"✅ Registered schema: {schema_name}")
         except Exception as e:
             logger.warning(f"⚠️ Failed to register schema {schema_name}: {e}")
-    
+
     # OpenAPI 스키마 업데이트
     app.openapi_schema = openapi_schema
-    
+
     logger.info("✅ Schemas registered successfully in OpenAPI documentation")
 
 
 def main() -> None:
     """
     애플리케이션 진입점
-    
+
     개발 환경에서 직접 실행할 때 사용됩니다.
     """
     try:
         logger.info("🎯 Starting DigiTech Hub Equipment API")
-        
+
         # 애플리케이션 생성
         app = create_app()
-        
+
         # 서버 설정
         host = os.getenv("HOST", "0.0.0.0")
-        port = int(os.getenv("PORT", "8000"))
+        port = int(os.getenv("PORT", "3001"))
         reload = os.getenv("ENVIRONMENT", "development") == "development"
-        
+
         logger.info(f"🌐 Server starting: http://{host}:{port}")
         logger.info(f"📚 API documentation: http://{host}:{port}/docs")
         logger.info(f"🔄 Auto reload: {'enabled' if reload else 'disabled'}")
-        
+
         # 서버 실행
         uvicorn.run(
             app,
@@ -293,7 +297,7 @@ def main() -> None:
             log_level="info",
             access_log=True,
         )
-        
+
     except KeyboardInterrupt:
         logger.info("👋 Application terminated by user")
     except Exception as e:
