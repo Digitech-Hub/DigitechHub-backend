@@ -277,7 +277,7 @@ export class MealsService {
         success: false,
         message: '식단 정보를 가져올 수 없습니다.',
         data: {
-          date: this.validateAndFormatDate(date),
+          date: date,
           hasData: false,
           cached: false,
           responseTime: duration,

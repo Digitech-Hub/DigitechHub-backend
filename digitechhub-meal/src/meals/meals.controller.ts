@@ -7,12 +7,12 @@ export class MealsController {
   constructor(private readonly mealsService: MealsService) {}
 
   @Get('today')
-  getTodayLunch(): Promise<MealResponse> {
-    return this.mealsService.getTodayLunch();
+  async getTodayLunch(): Promise<MealResponse> {
+    return await this.mealsService.getTodayLunch();
   }
 
   @Get('date')
-  getMealByDate(@Query('date') date: string): Promise<MealResponse> {
-    return this.mealsService.getMealByDate(date);
+  async getMealByDate(@Query('date') date: string): Promise<MealResponse> {
+    return await this.mealsService.getMealByDate(date);
   }
 }
