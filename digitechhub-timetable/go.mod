@@ -1,11 +1,11 @@
 module digitechhub-timetable
 
-go 1.21
+go 1.23.0
 
 require (
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/go-sql-driver/mysql v1.7.1
-	github.com/gofiber/fiber/v2 v2.52.6
+	github.com/gofiber/fiber/v2 v2.52.9
 	github.com/gofiber/swagger v1.1.1
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/joho/godotenv v1.5.1
@@ -47,8 +47,8 @@ require (
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/mod v0.18.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/tools v0.22.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
