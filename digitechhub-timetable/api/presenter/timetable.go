@@ -26,9 +26,10 @@ type TimetableResponse struct {
 	UpdatedAt    time.Time          `json:"updated_at"`
 }
 
+// @Description API 응답 공통 구조체
 type APIResponse struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
-	Data    any    `json:"data,omitempty"`
-	Error   string `json:"error,omitempty"`
+	Success bool   `json:"success" example:"true" description:"성공 여부"`
+	Message string `json:"message" example:"OK" description:"응답 메시지"`
+	Data    any    `json:"data,omitempty" description:"응답 데이터"`
+	Error   string `json:"error,omitempty" description:"오류 메시지 (실패 시에만 포함)"`
 }

@@ -1,4 +1,19 @@
 // main.go
+// @title Digitech Hub Timetable API
+// @version 1.0
+// @description 서울디지텍고등학교 시간표 조회 API
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:3002
+// @BasePath /api
+// @schemes http https
 package main
 
 import (
@@ -15,6 +30,8 @@ import (
 	"digitechhub-timetable/api/handler"
 	"digitechhub-timetable/api/routes"
 	"digitechhub-timetable/pkg/timetable"
+	
+	_ "digitechhub-timetable/docs"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
@@ -43,7 +60,7 @@ type Config struct {
 	DatabaseDSN  string
 	AllowOrigins string
 	RedisURL     string
-	NeisAPIKey  string
+	NeisAPIKey   string
 }
 
 type Server struct {

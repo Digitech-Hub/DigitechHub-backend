@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS digitechhub_timetable.timetables (
     id INT AUTO_INCREMENT PRIMARY KEY,
     grade INT NOT NULL,
     class_number INT NOT NULL,
-    subject VARCHAR(50) NOT NULL
+    subject VARCHAR(50) NOT NULL,
     day_of_week ENUM('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY') NOT NULL,
     semester ENUM('FIRST', 'SECOND') NOT NULL DEFAULT 'FIRST',
     academic_year YEAR NOT NULL,
