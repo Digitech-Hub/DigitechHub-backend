@@ -3,6 +3,7 @@ CREATE USER IF NOT EXISTS 'digitechhub_sso_user'@'%' IDENTIFIED BY 'digitechhub_
 CREATE USER IF NOT EXISTS 'digitechhub_equipment_user'@'%' IDENTIFIED BY 'digitechhub_equipment!!1234';
 CREATE USER IF NOT EXISTS 'digitechhub_notification_user'@'%' IDENTIFIED BY 'digitechhub_notification!!1234';
 CREATE USER IF NOT EXISTS 'digitechhub_meal_user'@'%' IDENTIFIED BY 'digitechhub_meal1234';
+CREATE USER IF NOT EXISTS 'digitechhub_timetable_user'@'%' IDENTIFIED BY 'digitechhubtimetable1234';
 
 -- SSO 전용 DB  
 CREATE DATABASE IF NOT EXISTS digitechhub_sso CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -31,10 +32,29 @@ CREATE TABLE IF NOT EXISTS digitechhub_meal.MealInfo (
     dish_names JSON NULL
 );
 
+-- 시간표용 DB
+CREATE DATABASE IF NOT EXISTS digitechhub_timetable CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- 사용자에게 두 DB에 대한 권한 부여
+-- 시간표 테이블
+CREATE TABLE IF NOT EXISTS digitechhub_timetable.timetables (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    grade INT NOT NULL,
+    class_number INT NOT NULL,
+    subject VARCHAR(50) NOT NULL,
+    day_of_week ENUM('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY') NOT NULL,
+    semester ENUM('FIRST', 'SECOND') NOT NULL DEFAULT 'FIRST',
+    academic_year YEAR NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_grade_class (grade, class_number),
+    INDEX idx_day_semester (day_of_week, semester),
+    INDEX idx_academic_year (academic_year)
+);
+
+-- 사용자에게 DB에 대한 권한 부여
 GRANT ALL PRIVILEGES ON digitechhub_sso.* TO 'digitechhub_sso_user'@'%';
 GRANT ALL PRIVILEGES ON digitechhub_equipment.* TO 'digitechhub_equipment_user'@'%';
 GRANT ALL PRIVILEGES ON digitechhub_notification.* TO 'digitechhub_notification_user'@'%';
 GRANT ALL PRIVILEGES ON digitechhub_meal.* TO 'digitechhub_meal_user'@'%';
+GRANT ALL PRIVILEGES ON digitechhub_timetable.* TO 'digitechhub_timetable_user'@'%';
 FLUSH PRIVILEGES;

@@ -151,6 +151,33 @@ services:
       retries: 3
       start_period: 60s
 
+  # Timetable 서비스
+  digitechhub-timetable:
+    build:
+      context: ./digitechhub-timetable
+      dockerfile: Dockerfile
+    container_name: digitechhub-timetable
+    environment:
+      PORT: 3002
+      ENVIRONMENT: production
+      DATABASE_DSN: digitechhub_timetable_user:digitechhubtimetable1234@(digitechhub-mysql:3306)/digitechhub_timetable?parseTime=true&loc=Local
+      REDIS_URL: redis://digitechhub-redis:6379
+      NEIS_API_KEY: ${NEIS_API_KEY:-}
+      ALLOW_ORIGINS: ${FRONTEND_URL}
+    ports:
+      - "3002:3002"
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - digitechhub-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/api/timetables/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
   # Kong Gateway (DB-less 모드)
   kong:
     image: kong:3.4
@@ -160,6 +187,7 @@ services:
       - digitechhub-sso
       - digitechhub-meal
       - digitechhub-equipment
+      - digitechhub-timetable
     environment:
       # DB-less 모드 설정
       KONG_DATABASE: "off"
