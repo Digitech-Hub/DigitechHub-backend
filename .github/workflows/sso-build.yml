@@ -35,6 +35,11 @@ jobs:
       SPRING_DATASOURCE_USERNAME: digitechhub_sso_user
       SPRING_DATASOURCE_PASSWORD: digitechhub_sso!!
       SPRING_PROFILES_ACTIVE: ci
+      JWT_EXPIRATION: 3600000
+      JWT_REFRESH_EXPIRATION: 86400000
+      JWT_PRIVATE_KEY_PATH: src/test/resources/keys/test_key.pem
+      JWT_PUBLIC_KEY_PATH: src/test/resources/keys/test_key.pem
+
 
     steps:
       - name: Checkout repository
