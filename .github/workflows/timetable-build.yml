@@ -1,0 +1,103 @@
+name: Timetable Build and Test
+
+on:
+  pull_request:
+    branches: [develop]
+  push:
+    paths:
+      - "digitechhub-timetable/**"
+      - ".github/workflows/timetable-build.yml"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: digitechhub_timetable
+          MYSQL_USER: digitechhub_timetable_user
+          MYSQL_PASSWORD: digitechhubtimetable1234
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7.0
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      PORT: 3002
+      ENVIRONMENT: production
+      DATABASE_DSN: digitechhub_timetable_user:digitechhubtimetable1234@(localhost:3306)/digitechhub_timetable?parseTime=true&loc=Local
+      REDIS_URL: redis://localhost:6379
+      NEIS_API_KEY: ${NEIS_API_KEY:-}
+      ALLOW_ORIGINS: ${FRONTEND_URL:-}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.20"
+
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Install dependencies
+        run: go mod download
+        working-directory: ./digitechhub-timetable
+
+      - name: Run tests
+        run: go test -v ./...
+        working-directory: ./digitechhub-timetable
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: timetable-test-results
+          path: ./digitechhub-timetable/test-results
+
+      - name: Build application
+        run: go build -o digitechhub-timetable .
+        working-directory: ./digitechhub-timetable
+
+      - name: Archive Build Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: timetable-build-artifact
+          path: ./digitechhub-timetable/digitechhub-timetable
+
+      - name: Get Current Time
+        uses: 1466587594/get-current-time@v2
+        id: current-time
+        with:
+          format: "YYYY-MM-DD HH:mm:ss"
+          utcOffset: "+09:00"
+
+      - name: Log Completion Time
+        run: |
+          echo "### ✅ Timetable build and tests completed at ${{ steps.current-time.outputs.time }}" >> $GITHUB_STEP_SUMMARY
