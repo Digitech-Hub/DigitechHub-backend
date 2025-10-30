@@ -37,8 +37,8 @@ jobs:
       SPRING_PROFILES_ACTIVE: ci
       JWT_EXPIRATION: 3600000
       JWT_REFRESH_EXPIRATION: 86400000
-      JWT_PRIVATE_KEY_PATH: digitechhub-sso/src/test/resources/keys/test_private_key.pem
-      JWT_PUBLIC_KEY_PATH: digitechhub-sso/src/test/resources/keys/test_public_key.pem
+      JWT_PRIVATE_KEY_PATH: src/test/resources/keys/test_private_key.pem
+      JWT_PUBLIC_KEY_PATH: src/test/resources/keys/test_public_key.pem
 
 
     steps:
