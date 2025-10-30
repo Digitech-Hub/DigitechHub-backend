@@ -1,0 +1,109 @@
+name: Meal Build and Test
+
+on:
+  pull_request:
+    branches: [develop]
+  push:
+    paths:
+      - "digitechhub-meal/**"
+      - ".github/workflows/meal-build.yml"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: digitechhub_meal
+          MYSQL_USER: digitechhub_meal_user
+          MYSQL_PASSWORD: digitechhubmeal1234
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7.0
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      PORT: 3000
+      NODE_ENV: production
+      DATABASE_URL: mysql://digitechhub_meal_user:digitechhubmeal1234@localhost:3306/digitechhub_meal
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      NEIS_API_KEY: ${NEIS_API_KEY:-}
+      NEIS_API_URL: https://open.neis.go.kr/hub/mealServiceDietInfo
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "latest"
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Cache pnpm store
+        uses: actions/cache@v3
+        with:
+          path: ~/.local/share/pnpm/store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: ./digitechhub-meal
+
+      - name: Prisma Generate
+        run: pnpm prisma generate
+        working-directory: ./digitechhub-meal
+
+      - name: Run build
+        run: pnpm build
+        working-directory: ./digitechhub-meal
+
+      - name: Run tests
+        run: pnpm test
+        working-directory: ./digitechhub-meal
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: meal-test-results
+          path: ./digitechhub-meal/test-results
+
+      - name: Archive Build Artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: meal-build-artifacts
+          path: ./digitechhub-meal/dist
+
+      - name: Get Current Time
+        uses: 1466587594/get-current-time@v2
+        id: current-time
+        with:
+          format: "YYYY-MM-DD HH:mm:ss"
+          utcOffset: "+09:00"
+
+      - name: Log Completion Time
+        run: |
+          echo "### ✅ Build and tests completed at ${{ steps.current-time.outputs.time }}" >> $GITHUB_STEP_SUMMARY
