@@ -1,23 +1,50 @@
 name: SSO Build and Test
 
 on:
+  pull_request:
+    branches: [develop]
   push:
     paths:
-      - "digitechhub-sso/**"
-      - ".github/workflows/sso-build.yml"
+      - 'digitechhub-sso/**'
+      - '.github/workflows/sso-build.yml'
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+
+    # MySQL 서비스 컨테이너 구성
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: digitechhub_sso
+          MYSQL_USER: digitechhub_sso_user
+          MYSQL_PASSWORD: digitechhub_sso!!
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    # 테스트에 필요한 환경 변수 주입
+    env:
+      SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/digitechhub_sso
+      SPRING_DATASOURCE_USERNAME: digitechhub_sso_user
+      SPRING_DATASOURCE_PASSWORD: digitechhub_sso!!
+      SPRING_PROFILES_ACTIVE: ci
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Java 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
-          java-version: "17"
-          distribution: "temurin"
+          java-version: '17'
+          distribution: 'temurin'
 
       - name: Cache Maven packages
         uses: actions/cache@v3
@@ -30,12 +57,12 @@ jobs:
       - name: Build with Maven
         run: |
           cd digitechhub-sso
-          ./mvnw clean install -DskipTests
+          mvn clean install -DskipTests
 
       - name: Run Tests with Maven
         run: |
           cd digitechhub-sso
-          ./mvnw test
+          mvn test
 
       - name: Archive Test Results
         if: always()
@@ -55,9 +82,9 @@ jobs:
         uses: 1466587594/get-current-time@v2
         id: current-time
         with:
-          format: "YYYY-MM-DD HH:mm:ss"
-          utcOffset: "+09:00"
+          format: 'YYYY-MM-DD HH:mm:ss'
+          utcOffset: '+09:00'
 
       - name: Log Completion Time
-        run: echo "Build and tests completed at ${{ steps.current-time.outputs.time }}"
-        shell: bash
+        run: |
+          echo "### ✅ Build and tests completed at ${{ steps.current-time.outputs.time }}" >> $GITHUB_STEP_SUMMARY
