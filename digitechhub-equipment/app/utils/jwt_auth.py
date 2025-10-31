@@ -4,12 +4,14 @@ JWT 토큰 검증 유틸리티
 SSO 서버에서 발급한 JWT 토큰을 Public Key를 사용하여 검증합니다.
 """
 
-import jwt
-from fastapi import HTTPException, status
-from typing import Optional, Dict, Any
 import os
+from pathlib import Path
+from typing import Any, Dict, Optional, cast
+
+import jwt
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from fastapi import HTTPException, status
 
 
 class JWTAuth:
@@ -25,7 +27,7 @@ class JWTAuth:
             public_key_path: Public Key 파일 경로
         """
         self.public_key_path = public_key_path
-        self._public_key = None
+        self._public_key: Optional[bytes] = None
     
     def _load_public_key(self) -> bytes:
         """
@@ -37,9 +39,9 @@ class JWTAuth:
         if self._public_key is None:
             try:
                 # 프로젝트 루트에서 키 파일 찾기
-                key_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), self.public_key_path)
+                key_file_path = Path(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), self.public_key_path))
                 
-                with open(key_file, 'rb') as key_file:
+                with open(key_file_path, 'rb') as key_file:
                     self._public_key = key_file.read()
             except FileNotFoundError:
                 raise HTTPException(
@@ -76,7 +78,7 @@ class JWTAuth:
             # 토큰 검증 및 디코딩
             payload = jwt.decode(
                 token,
-                public_key,
+                cast(rsa.RSAPublicKey, public_key),
                 algorithms=["RS256"],
                 options={"verify_exp": True, "verify_signature": True}
             )

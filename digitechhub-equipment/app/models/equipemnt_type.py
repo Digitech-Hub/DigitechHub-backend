@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import String, Boolean, Index
+from sqlalchemy import Boolean, Index, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.abstract_base import AbstractBaseModel

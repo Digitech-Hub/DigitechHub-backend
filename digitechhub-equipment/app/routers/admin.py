@@ -1,17 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.utils import get_database, get_current_user, logger
+from app.utils import get_database, logger
+from app.utils.dependencies import require_role
 
 router = APIRouter(
     prefix="/api/admin/equipments",
     tags=["Admin Equipment Management"]
 )
 
-@router.get("/")
+@router.get("/", dependencies=[Depends(require_role("ADMIN"))])
 async def get_all_equipments(
-    session : AsyncSession = Depends(get_database),
-    current_user : dict = Depends(get_current_user)
+    session : AsyncSession = Depends(get_database)
 ):
     try:
         pass

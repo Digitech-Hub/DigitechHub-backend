@@ -5,7 +5,6 @@
 """
 
 from .equipment import router as equipment_router
+from .rental import router as rental_router
 
-__all__ = [
-    "equipment_router",
-]
+__all__ = ["equipment_router", "rental_router"]
