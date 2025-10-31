@@ -9,7 +9,8 @@ import sys
 # 프로젝트 루트를 Python 경로에 추가
 sys.path.insert(0, '/app')
 
-from app.utils.database import Base, async_engine
+from app.models.abstract_base import Base
+from app.utils.database import async_engine
 
 
 async def init_database():

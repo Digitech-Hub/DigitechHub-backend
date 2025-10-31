@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.utils import get_database, logger
-from app.utils.dependencies import require_role
+from app.utils import logger
+from app.utils.dependencies import get_database, require_role
 
 router = APIRouter(
     prefix="/api/admin/equipments",

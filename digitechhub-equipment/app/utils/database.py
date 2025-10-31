@@ -7,7 +7,6 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
                                     create_async_engine)
-from sqlalchemy.orm import DeclarativeBase
 
 load_dotenv()
 
@@ -38,10 +37,3 @@ AsyncSessionLocal = async_sessionmaker(
     autoflush=False,
 )
 
-
-class Base(DeclarativeBase):
-    """
-    모든 데이터베이스 모델의 기본 클래스
-    """
-
-    pass
