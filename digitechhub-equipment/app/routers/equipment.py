@@ -11,8 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.equipments.interface import \
     EquipmentManagementServiceInterface
-from app.utils import ResponseFactory, get_database, logger
-from app.utils.dependencies import get_equipment_service
+from app.utils import ResponseFactory, logger
+from app.utils.dependencies import get_database, get_equipment_service
 
 router = APIRouter(
     prefix="/api/equipments",

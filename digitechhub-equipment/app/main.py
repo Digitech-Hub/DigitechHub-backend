@@ -18,6 +18,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.models.abstract_base import Base
 from app.routers.equipment import router as equipment_router
 from app.schemas.input.rental import ExtendRentalRequest, RentEquipmentRequest
 from app.schemas.output.equipment import EquipmentInfoResponse
@@ -30,7 +31,7 @@ from app.schemas.output.response import (ApiResponse, ErrorResponse,
                                          SuccessResponse,
                                          ValidationErrorDetail,
                                          ValidationErrorResponse)
-from app.utils.database import Base, async_engine
+from app.utils.database import async_engine
 from app.utils.logger import logger
 
 # 환경 변수 로드

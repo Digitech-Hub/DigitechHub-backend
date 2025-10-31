@@ -10,9 +10,15 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from sqlalchemy import DateTime, String, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from app.utils.database import Base
+
+class Base(DeclarativeBase):
+    """
+    모든 데이터베이스 모델의 기본 클래스
+    """
+
+    pass
 
 
 class AbstractBaseModel(Base):

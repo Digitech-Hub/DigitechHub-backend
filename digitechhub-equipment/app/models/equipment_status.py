@@ -1,10 +1,14 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import Boolean, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.abstract_base import AbstractBaseModel
-from app.models.equipment import Equipment
+
+if TYPE_CHECKING:
+    from app.models.equipment import Equipment
 
 
 class EquipmentStatus(AbstractBaseModel):

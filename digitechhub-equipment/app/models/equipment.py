@@ -1,13 +1,16 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import Boolean, ForeignKey, Index, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.abstract_base import AbstractBaseModel
-from app.models.equipemnt_type import EquipmentType
-from app.models.equipment_status import EquipmentStatus
-from app.models.rental_history import RentalHistory
 
+if TYPE_CHECKING:
+    from app.models.equipemnt_type import EquipmentType
+    from app.models.equipment_status import EquipmentStatus
+    from app.models.rental_history import RentalHistory
 
 class Equipment(AbstractBaseModel):
     """
