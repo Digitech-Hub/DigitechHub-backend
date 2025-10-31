@@ -2,13 +2,23 @@
 프로젝트 전역에서 사용하는 의존성 주입 유틸리티를 정의합니다.
 """
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import AsyncGenerator
+
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.repositories.equipment_status.impl import EquipmentStatusRepository
+from app.repositories.equipments.impl import EquipmentRepository
+from app.repositories.rental_histories.impl import RentalHistoryRepository
+from app.services.equipment_status.impl import EquipmentStatusService
+from app.services.equipments.impl import EquipmentManagementService
+from app.services.rental.impl import RentalService
+from app.services.rental_histories.impl import RentalHistoryService
+
 from .database import AsyncSessionLocal
-from .logger import logger
 from .jwt_auth import jwt_auth
+from .logger import logger
 
 
 async def get_database() -> AsyncGenerator[AsyncSession, None]:
@@ -90,3 +100,30 @@ def require_role(required_role: str):
         return current_user
 
     return role_checker
+
+
+def get_equipment_service(
+    equipment_repository=Depends(EquipmentRepository),
+    equipment_status_repository=Depends(EquipmentStatusRepository),
+):
+    return EquipmentManagementService(equipment_repository, equipment_status_repository)
+
+
+def get_equipment_status_service(
+    equipment_status_repository=Depends(EquipmentStatusRepository),
+):
+    return EquipmentStatusService(equipment_status_repository)
+
+
+def get_rental_history_service(rental_repository=Depends(RentalHistoryRepository)):
+    return RentalHistoryService(rental_repository)
+
+
+def get_rental_service(
+    rental_history_service=Depends(get_rental_history_service),
+    equipment_service=Depends(get_equipment_service),
+    equipment_status_service=Depends(get_equipment_status_service),
+):
+    return RentalService(
+        rental_history_service, equipment_service, equipment_status_service
+    )

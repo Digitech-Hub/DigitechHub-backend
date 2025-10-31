@@ -11,7 +11,9 @@ sys.path.insert(0, '/app')
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 from app.utils.status_initializer import EquipmentStatusInitializer
+
 
 def init_statuses():
     """기본 기자재 상태들을 초기화합니다."""

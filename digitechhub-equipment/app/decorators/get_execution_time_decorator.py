@@ -1,6 +1,6 @@
-import time
 import asyncio
 import logging
+import time
 from functools import wraps
 
 logger = logging.getLogger("execution_timer")

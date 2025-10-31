@@ -4,17 +4,14 @@ API 응답 생성 유틸리티
 표준화된 API 응답을 생성하기 위한 헬퍼 함수들입니다.
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, List, Optional
 
 from fastapi import status
 from fastapi.responses import JSONResponse
 
-from app.schemas.response import (
-    ErrorResponse,
-    SuccessResponse,
-    ValidationErrorDetail,
-    ValidationErrorResponse,
-)
+from app.schemas.output.response import (ErrorResponse, SuccessResponse,
+                                         ValidationErrorDetail,
+                                         ValidationErrorResponse)
 
 
 def create_success_response(

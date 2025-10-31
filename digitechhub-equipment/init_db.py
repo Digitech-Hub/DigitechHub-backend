@@ -5,14 +5,12 @@
 
 import asyncio
 import sys
-import os
 
 # 프로젝트 루트를 Python 경로에 추가
 sys.path.insert(0, '/app')
 
 from app.utils.database import Base, async_engine
-from app.models import Equipment, EquipmentStatus, EquipmentType, RentalHistory
-from app.utils.status_initializer import EquipmentStatusInitializer
+
 
 async def init_database():
     """데이터베이스 테이블을 생성하고 초기 데이터를 삽입합니다."""

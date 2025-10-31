@@ -1,0 +1,71 @@
+name: Equipment Build and Test
+
+on:
+  pull_request:
+    branches: [develop]
+  push:
+    paths:
+      - "digitechhub-equipment/**"
+      - ".github/workflows/equipment-build.yml"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: digitechhub_equipment
+          MYSQL_USER: digitechhub_equipment_user
+          MYSQL_PASSWORD: digitechhub_equipment!!1234
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7.0
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: mysql+aiomysql://digitechhub_equipment_user:digitechhub_equipment!!1234@digitechhub-mysql:3306/digitechhub_equipment
+      REDIS_HOST: digitechhub-redis
+      REDIS_PORT: 6379
+      PORT: 3001
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup virtual environment
+        run: uv sync
+        working-directory: digitechhub-equipment
+
+      - name: Make static analyzer executable
+        run: chmod +x static_analyzer.sh
+        working-directory: digitechhub-equipment
+
+      - name: Run static analyzer
+        run: ./static_analyzer.sh
+        working-directory: digitechhub-equipment

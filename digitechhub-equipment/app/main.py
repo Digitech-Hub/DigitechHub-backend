@@ -18,27 +18,20 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.utils.logger import logger
-from app.utils.database import Base, async_engine
-from app.exceptions.handlers import setup_exception_handlers
 from app.routers.equipment import router as equipment_router
-from app.schemas import (
-    RentEquipmentRequest,
-    ExtendRentalRequest,
-    ApiResponse,
-    SuccessResponse,
-    ErrorResponse,
-    ValidationErrorDetail,
-    ValidationErrorResponse,
-    RentalHistoryResponse,
-    EquipmentStatusInfo,
-    EquipmentInfoResponse,
-    RentalResponse,
-    UserRentalInfo,
-    UserRentalsResponse,
-    RentalDetailInfo,
-    RentalDetailResponse,
-)
+from app.schemas.input.rental import ExtendRentalRequest, RentEquipmentRequest
+from app.schemas.output.equipment import EquipmentInfoResponse
+from app.schemas.output.equipment_status import EquipmentStatusInfo
+from app.schemas.output.rental import (ExtendRentalResponse, RentalResponse,
+                                       ReturnEquipmentResponse)
+from app.schemas.output.rental_history import (RentalDetailInfo,
+                                               RentalHistoryResponse)
+from app.schemas.output.response import (ApiResponse, ErrorResponse,
+                                         SuccessResponse,
+                                         ValidationErrorDetail,
+                                         ValidationErrorResponse)
+from app.utils.database import Base, async_engine
+from app.utils.logger import logger
 
 # 환경 변수 로드
 load_dotenv()
@@ -112,9 +105,6 @@ def create_app() -> FastAPI:
 
     # 미들웨어 설정
     setup_middleware(app)
-
-    # 예외 핸들러 설정
-    setup_exception_handlers(app)
 
     # 스키마 등록
     register_schemas(app)
@@ -246,17 +236,15 @@ def register_schemas(app: FastAPI) -> None:
         "EquipmentStatusInfo": EquipmentStatusInfo,
         "EquipmentInfoResponse": EquipmentInfoResponse,
         "RentalResponse": RentalResponse,
-        "UserRentalInfo": UserRentalInfo,
-        "UserRentalsResponse": UserRentalsResponse,
         "RentalDetailInfo": RentalDetailInfo,
-        "RentalDetailResponse": RentalDetailResponse,
+        "ExtendRentalResponse": ExtendRentalResponse,
+        "ReturnEquipmentResponse": ReturnEquipmentResponse,
     }
 
     for schema_name, schema_class in schemas_to_register.items():
         try:
             # Pydantic 모델의 JSON 스키마를 가져와서 등록
-            schema_dict = schema_class.model_json_schema()
-            openapi_schema["components"]["schemas"][schema_name] = schema_dict
+            openapi_schema["components"]["schemas"][schema_name] = schema_name
             logger.debug(f"✅ Registered schema: {schema_name}")
         except Exception as e:
             logger.warning(f"⚠️ Failed to register schema {schema_name}: {e}")
