@@ -187,11 +187,11 @@ def setup_routers(app: FastAPI) -> None:
     Args:
         app: FastAPI 애플리케이션 인스턴스
     """
-    # 라우터 등록
-    app.include_router(equipment_router)
-    app.include_router(admin_router.router)
-    app.include_router(rental_router)
+    # 라우터 등록 (더 구체적인 경로부터 등록)
     app.include_router(rental_history_router)
+    app.include_router(rental_router)
+    app.include_router(admin_router.router)
+    app.include_router(equipment_router)
 
 
 def setup_middleware(app: FastAPI) -> None:
