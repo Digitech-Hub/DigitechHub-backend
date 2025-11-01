@@ -4,16 +4,17 @@
 관리자 권한의 기자재 관리 API 엔드포인트들을 정의합니다.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.exceptions.custom import BaseAPIException
 from app.services.admin.interface import AdminEquipmentServiceInterface
 from app.utils import ResponseFactory, logger
-from app.utils.dependencies import get_admin_service, get_database, require_role
+from app.utils.dependencies import (get_admin_service, get_database,
+                                    require_role)
 
 router = APIRouter(
-    prefix="/api/admin/equipments",
+    prefix="/admin",
     tags=["Admin Equipment Management"],
     responses={
         401: {"description": "Unauthorized - JWT token required"},
@@ -62,9 +63,7 @@ async def get_all_equipments(
             limit=limit,
         )
 
-        logger.info(
-            f"Admin: Retrieved {equipment_list.total} equipments successfully"
-        )
+        logger.info(f"Admin: Retrieved {equipment_list.total} equipments successfully")
         return ResponseFactory.success(message="기자재 목록", data=equipment_list)
 
     except Exception as e:
@@ -94,10 +93,14 @@ async def get_equipment_detail(
     try:
         logger.info(f"Admin: Getting equipment detail for ID={equipment_id}")
 
-        equipment = await admin_service.get_equipment(session, equipment_id=equipment_id)
+        equipment = await admin_service.get_equipment(
+            session, equipment_id=equipment_id
+        )
         logger.info("Admin: Retrieved equipment detail successfully")
 
-        return ResponseFactory.success(message="기자재 상세 정보", data={"equipment": equipment})
+        return ResponseFactory.success(
+            message="기자재 상세 정보", data={"equipment": equipment}
+        )
 
     except BaseAPIException as e:
         logger.error(f"Admin error getting equipment detail: {e.message}")
@@ -116,9 +119,9 @@ async def get_equipment_detail(
     dependencies=[Depends(require_role("ADMIN"))],
 )
 async def create_equipment(
+    equipment_type_id: str,
+    equipment_status_id: str,
     alias: str | None = None,
-    equipment_type_id: str = None,
-    equipment_status_id: str = None,
     is_public: bool = True,
     admin_comment: str | None = None,
     info_comment: str | None = None,
@@ -150,7 +153,9 @@ async def create_equipment(
         )
 
         logger.info(f"Admin: Created equipment successfully: {equipment.id}")
-        return ResponseFactory.success(message="기자재 생성 성공", data={"equipment": equipment})
+        return ResponseFactory.success(
+            message="기자재 생성 성공", data={"equipment": equipment}
+        )
 
     except BaseAPIException as e:
         logger.error(f"Admin error creating equipment: {e.message}")
@@ -200,7 +205,9 @@ async def update_equipment(
         )
 
         logger.info(f"Admin: Updated equipment successfully: {equipment.id}")
-        return ResponseFactory.success(message="기자재 수정 성공", data={"equipment": equipment})
+        return ResponseFactory.success(
+            message="기자재 수정 성공", data={"equipment": equipment}
+        )
 
     except BaseAPIException as e:
         logger.error(f"Admin error updating equipment: {e.message}")

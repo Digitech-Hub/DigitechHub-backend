@@ -9,4 +9,4 @@ from .equipment import router as equipment_router
 from .rental import router as rental_router
 from .rental_history import router as rental_history_router
 
-__all__ = ["admin_router", "equipment_router", "rental_router"]
+__all__ = ["admin_router", "equipment_router", "rental_router", "rental_history_router"]
