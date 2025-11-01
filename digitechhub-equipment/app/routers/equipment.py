@@ -161,7 +161,7 @@ async def get_equipments(
 
 
 @router.get(
-    "/{equipment_id}",
+    "/info/{equipment_id}",
     summary="기자재 상세 정보 조회",
     description="특정 기자재의 상세 정보를 조회합니다. 공개된 기자재만 조회 가능합니다.",
     response_description="기자재 상세 정보",
