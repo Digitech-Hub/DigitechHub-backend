@@ -126,6 +126,13 @@ def create_app() -> FastAPI:
 
     # CORS 미들웨어 설정
     setup_cors_middleware(app)
+    
+    # Kong Gateway를 위한 Swagger UI 경로 추가
+    from starlette.responses import RedirectResponse
+    
+    @app.get("/api/equipments/docs", include_in_schema=False)
+    async def swagger_redirect():
+        return RedirectResponse(url="/docs")
 
     # 라우터 등록 (향후 확장용)
     setup_routers(app)

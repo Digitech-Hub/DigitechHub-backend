@@ -13,6 +13,15 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
+  
+  // Kong Gateway를 위한 Swagger UI 경로 추가
+  app.use('/api/meal/docs', (req, res, next) => {
+    if (req.url === '/api/meal/docs' || req.url === '/api/meal/docs/') {
+      res.redirect('/docs');
+    } else {
+      next();
+    }
+  });
 
   await app.listen(process.env.PORT ?? 3000);
 }

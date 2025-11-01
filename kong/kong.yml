@@ -75,7 +75,7 @@ services:
     retries: 5
     routes:
       - name: equipment-swagger-route
-        strip_path: true
+        strip_path: false
         paths:
           - /api/equipments/docs
         methods:
@@ -137,7 +137,7 @@ services:
     retries: 5
     routes:
       - name: meal-swagger-route
-        strip_path: true
+        strip_path: false
         paths:
           - /api/meal/docs
         methods:
@@ -197,7 +197,7 @@ services:
     retries: 5
     routes:
       - name: timetable-swagger-route
-        strip_path: true
+        strip_path: false
         paths:
           - /api/timetables/docs
         methods:
