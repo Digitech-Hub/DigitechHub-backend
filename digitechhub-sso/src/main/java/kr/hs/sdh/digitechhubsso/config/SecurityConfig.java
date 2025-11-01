@@ -52,8 +52,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/health").permitAll()
                 
                 // Swagger UI
-                .requestMatchers("/docs").permitAll()
+                .requestMatchers("/swagger-ui.html").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
+                .requestMatchers("/docs").permitAll()
                 
                 // 기타 모든 요청은 인증 필요
                 .anyRequest().authenticated()
