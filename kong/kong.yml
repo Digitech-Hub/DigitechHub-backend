@@ -14,15 +14,6 @@ services:
     read_timeout: 60000
     retries: 5
     routes:
-      - name: sso-swagger-route
-        strip_path: false
-        paths:
-          - /api/auth/docs
-        methods:
-          - GET
-        protocols:
-          - http
-          - https
       - name: sso-auth-route
         strip_path: false
         paths:
@@ -33,6 +24,15 @@ services:
           - PUT
           - DELETE
           - OPTIONS
+        protocols:
+          - http
+          - https
+      - name: sso-swagger-route
+        strip_path: false
+        paths:
+          - /api/auth/docs
+        methods:
+          - GET
         protocols:
           - http
           - https
