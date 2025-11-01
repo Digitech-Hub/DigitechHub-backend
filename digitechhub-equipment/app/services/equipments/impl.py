@@ -65,8 +65,8 @@ class EquipmentManagementService(EquipmentManagementServiceInterface):
         self,
         session: AsyncSession,
         *,
-        query: str = "",
-        category: str = "",
+        query: str | None = "",
+        category: str | None = "",
         offset: int = 0,
         limit: int = 10,
     ) -> Page[EquipmentInfoResponse]:

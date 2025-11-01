@@ -16,7 +16,7 @@ class EquipmentRepository(EquipmentRepositoryInterface):
         result = await session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_public_equipments(self, session: AsyncSession, query: str, category: str, offset: int = 0, limit: int = 10) -> Sequence[Equipment]:
+    async def get_public_equipments(self, session: AsyncSession, query: str | None = "", category: str | None = "", offset: int = 0, limit: int = 10) -> Sequence[Equipment]:
         base_query = select(Equipment).where(Equipment.is_public)
 
         if query and query.strip():
@@ -33,7 +33,7 @@ class EquipmentRepository(EquipmentRepositoryInterface):
         result = await session.execute(base_query)
         return result.scalars().all()
 
-    async def count_public_equipments(self, session: AsyncSession, query: str, category: str) -> int:
+    async def count_public_equipments(self, session: AsyncSession, query: str | None = "", category: str | None = "") -> int:
         count_query = select(func.count(Equipment.id)).where(Equipment.is_public)
         
         if query and query.strip():

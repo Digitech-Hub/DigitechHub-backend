@@ -14,9 +14,12 @@ from typing import AsyncGenerator
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from app.models.abstract_base import Base
 from app.routers.equipment import router as equipment_router
@@ -30,27 +33,52 @@ from app.schemas.output.rental_history import (RentalDetailInfo,
 from app.schemas.output.response import (ApiResponse, ErrorResponse,
                                          SuccessResponse,
                                          ValidationErrorDetail,
-                                         ValidationErrorResponse)
+                                         ValidationErrorResponse,
+                                         create_error_response)
 from app.utils.database import async_engine
 from app.utils.logger import logger
+from app.utils.status_initializer import EquipmentStatusInitializer
 
 # 환경 변수 로드
 load_dotenv()
 
 
-def init_database():
+async def init_database():
     """
     데이터베이스 테이블 초기화 함수
     """
     try:
         logger.info("🔧 Initializing database tables...")
-        Base.metadata.create_all(bind=async_engine)
+        async with async_engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
         logger.info("✅ Database tables initialized successfully")
         return True
     except Exception as e:
         logger.error(f"❌ Database initialization failed: {e}")
         logger.warning("⚠️ Continuing application startup...")
         return False
+
+
+def init_statuses():
+    """기본 기자재 상태들을 초기화합니다."""
+    try:
+        print("Initializing default equipment statuses...")
+
+        # 동기식 엔진 생성 (상태 초기화용)
+        sync_database_url = os.environ.get(
+            "DATABASE_URL",
+            "mysql+pymysql://root:password@digitechhub-mysql:3306/digitechhub_equipment",
+        )
+        sync_engine = create_engine(sync_database_url)
+        SyncSessionLocal = sessionmaker(bind=sync_engine)
+
+        with SyncSessionLocal() as sync_session:
+            EquipmentStatusInitializer.initialize_default_statuses(sync_session)
+            print("Default equipment statuses initialized successfully!")
+
+    except Exception as e:
+        print(f"Error during status initialization: {e}")
+        raise
 
 
 @asynccontextmanager
@@ -65,7 +93,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("🚀 Starting Digitech Hub Equipment API...")
 
     # 데이터베이스 초기화
-    init_database()
+    await init_database()
 
     yield
 
@@ -80,8 +108,6 @@ def create_app() -> FastAPI:
     Returns:
         FastAPI: 설정된 FastAPI 애플리케이션 인스턴스
     """
-    # 데이터베이스 초기화 (create_app 시점에서도 실행)
-    init_database()
 
     app = FastAPI(
         title="Digitech Hub Equipment API",
@@ -296,6 +322,45 @@ def main() -> None:
 
 # 서버 인스턴스 생성 (ASGI 서버에서 사용)
 app = create_app()
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """HTTP 예외를 처리합니다 (404 포함)."""
+    detail_str = str(exc.detail) if exc.detail else "알 수 없는 오류"
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=create_error_response(message=detail_str, error=detail_str),
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """유효성 검사 에러를 처리합니다."""
+    errors = []
+    for error in exc.errors():
+        field = " -> ".join(str(loc) for loc in error["loc"])
+        errors.append(f"{field}: {error['msg']}")
+
+    return JSONResponse(
+        status_code=422,
+        content=create_error_response(
+            message="유효성 검사에 실패했습니다", error="; ".join(errors)
+        ),
+    )
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    """일반 예외를 처리합니다."""
+    logger.error(f"처리되지 않은 예외: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content=create_error_response(
+            message="내부 서버 오류가 발생했습니다",
+            error="예상치 못한 오류가 발생했습니다",
+        ),
+    )
 
 
 if __name__ == "__main__":

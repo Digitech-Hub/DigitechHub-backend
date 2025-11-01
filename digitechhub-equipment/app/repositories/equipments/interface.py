@@ -13,14 +13,14 @@ class EquipmentRepositoryInterface(Protocol):
     async def get_public_equipments(
         self,
         session: AsyncSession,
-        query: str,
-        category: str,
+        query: str | None = "",
+        category: str | None = "",
         offset: int = 0,
         limit: int = 10,
     ) -> Sequence[Equipment]: ...
 
     async def count_public_equipments(
-        self, session: AsyncSession, query: str, category: str
+        self, session: AsyncSession, query: str | None = "", category: str | None = ""
     ) -> int: ...
 
     async def save(self, session: AsyncSession, equipment: Equipment) -> Equipment: ...
