@@ -57,6 +57,9 @@ public class SecurityConfig {
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .requestMatchers("/docs").permitAll()
                 
+                // 에러 페이지
+                .requestMatchers("/error").permitAll()
+                
                 // 기타 모든 요청은 인증 필요
                 .anyRequest().authenticated()
             )
