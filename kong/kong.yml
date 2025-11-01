@@ -74,16 +74,6 @@ services:
     read_timeout: 60000
     retries: 5
     routes:
-      - name: equipment-swagger-route
-        strip_path: false
-        paths:
-          - /api/equipments/docs
-        methods:
-          - GET
-          - HEAD
-        protocols:
-          - http
-          - https
       - name: equipment-route
         strip_path: false
         paths:
