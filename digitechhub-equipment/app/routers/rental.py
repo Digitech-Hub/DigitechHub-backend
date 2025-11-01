@@ -9,7 +9,7 @@ from app.utils.dependencies import (get_current_user, get_database,
 from app.utils.response_factory import ResponseFactory
 
 router = APIRouter(
-    prefix="/rental",
+    prefix="/api/equipments/rental",
     tags=["Equipment Rental"],
     responses={
         401: {"description": "Unauthorized - JWT token required"},

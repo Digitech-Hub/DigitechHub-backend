@@ -14,7 +14,7 @@ from app.utils import ResponseFactory, logger
 from app.utils.dependencies import get_database, get_equipment_service
 
 router = APIRouter(
-    prefix="/equipment",
+    prefix="/api/equipments",
     tags=["Equipment Management"],
     responses={
         401: {"description": "Unauthorized - JWT token required"},

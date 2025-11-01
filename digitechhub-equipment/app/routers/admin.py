@@ -14,7 +14,7 @@ from app.utils.dependencies import (get_admin_service, get_database,
                                     require_role)
 
 router = APIRouter(
-    prefix="/admin",
+    prefix="/api/equipments/admin",
     tags=["Admin Equipment Management"],
     responses={
         401: {"description": "Unauthorized - JWT token required"},
