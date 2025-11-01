@@ -56,6 +56,7 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .requestMatchers("/docs").permitAll()
+                .requestMatchers("/api/auth/docs").permitAll()
                 
                 // 에러 페이지
                 .requestMatchers("/error").permitAll()

@@ -17,7 +17,7 @@ services:
       - name: sso-swagger-route
         strip_path: false
         paths:
-          - /api/auth/swagger-ui.html
+          - /api/auth/docs
         methods:
           - GET
         protocols:
