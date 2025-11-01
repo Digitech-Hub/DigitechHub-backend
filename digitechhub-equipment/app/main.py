@@ -119,6 +119,7 @@ def create_app(prefix: str = "/api/equipment") -> FastAPI:
         docs_url="/docs",
         redoc_url="/redoc",
         lifespan=lifespan,
+        redirect_slashes=True,
         openapi_tags=[
             {
                 "name": "Equipment Management",
