@@ -22,6 +22,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.models.abstract_base import Base
+from app.routers import admin as admin_router
 from app.routers.equipment import router as equipment_router
 from app.schemas.input.rental import ExtendRentalRequest, RentEquipmentRequest
 from app.schemas.output.equipment import EquipmentInfoResponse
@@ -186,6 +187,7 @@ def setup_routers(app: FastAPI) -> None:
     """
     # 라우터 등록
     app.include_router(equipment_router)
+    app.include_router(admin_router.router)
 
 
 def setup_middleware(app: FastAPI) -> None:
