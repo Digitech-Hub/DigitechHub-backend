@@ -1,4 +1,18 @@
 basePath: /api
+definitions:
+  presenter.APIResponse:
+    description: API 응답 공통 구조체
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        example: OK
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
 host: localhost:3002
 info:
   contact:
@@ -12,7 +26,161 @@ info:
   termsOfService: http://swagger.io/terms/
   title: Digitech Hub Timetable API
   version: "1.0"
-paths: {}
+paths:
+  /api/timetables/day:
+    get:
+      consumes:
+      - application/json
+      description: 특정 요일의 시간표를 조회합니다
+      parameters:
+      - description: 학년 (1-3)
+        in: query
+        name: grade
+        required: true
+        type: integer
+      - description: 반 (1-20)
+        in: query
+        name: class
+        required: true
+        type: integer
+      - description: 요일
+        enum:
+        - MONDAY
+        - TUESDAY
+        - WEDNESDAY
+        - THURSDAY
+        - FRIDAY
+        - SATURDAY
+        - SUNDAY
+        in: query
+        name: day
+        required: true
+        type: string
+      - description: 학기
+        enum:
+        - FIRST
+        - SECOND
+        in: query
+        name: semester
+        type: string
+      - default: 2025
+        description: 학년도
+        in: query
+        name: year
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presenter.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenter.APIResponse'
+      summary: 특정 요일 시간표 조회
+      tags:
+      - Timetable
+  /api/timetables/health:
+    get:
+      consumes:
+      - application/json
+      description: 서비스 상태 확인
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.APIResponse'
+      summary: Health Check
+      tags:
+      - Health
+  /api/timetables/today:
+    get:
+      consumes:
+      - application/json
+      description: 오늘의 시간표를 조회합니다
+      parameters:
+      - description: 학년 (1-3)
+        in: query
+        name: grade
+        required: true
+        type: integer
+      - description: 반 (1-20)
+        in: query
+        name: class
+        required: true
+        type: integer
+      - description: 학기
+        enum:
+        - FIRST
+        - SECOND
+        in: query
+        name: semester
+        type: string
+      - default: 2025
+        description: 학년도
+        in: query
+        name: year
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presenter.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenter.APIResponse'
+      summary: 오늘 시간표 조회
+      tags:
+      - Timetable
+  /api/timetables/week:
+    get:
+      consumes:
+      - application/json
+      description: 현재 주의 시간표를 조회합니다
+      parameters:
+      - description: 학년 (1-3)
+        in: query
+        name: grade
+        required: true
+        type: integer
+      - description: 반 (1-20)
+        in: query
+        name: class
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/presenter.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenter.APIResponse'
+      summary: 주간 시간표 조회
+      tags:
+      - Timetable
 schemes:
 - http
 - https
