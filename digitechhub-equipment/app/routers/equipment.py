@@ -4,8 +4,7 @@ Equipment 라우터
 장비 관련 API 엔드포인트들을 정의합니다.
 """
 
-
-from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -126,12 +125,8 @@ async def health_check(
     },
 )
 async def get_equipments(
-    query: str = Query(
-        "", description="검색어 (기자재 별칭 또는 설명에서 검색)", example="MacBook"
-    ),
-    category: str = Query(
-        "", description="기자재 카테고리 필터", example="노트북"
-    ),
+    query: str | None = None,
+    category: str | None = None,
     offset: int = 0,
     limit: int = 10,
     session: AsyncSession = Depends(get_database),
@@ -156,10 +151,7 @@ async def get_equipments(
         )
 
         logger.info(f"Retrieved {equipment_list.total} public equipments successfully")
-        return ResponseFactory.success(
-            message="기자재 목록",
-            data=equipment_list
-        )
+        return ResponseFactory.success(message="기자재 목록", data=equipment_list)
 
     except Exception as e:
         logger.error(f"Failed to get equipments: {e}")
@@ -214,9 +206,7 @@ async def get_equipments(
     },
 )
 async def get_equipment_information(
-    equipment_id: str = Path(
-        ..., description="기자재 고유 ID", example="equipment_123"
-    ),
+    equipment_id: str,
     session: AsyncSession = Depends(get_database),
     equipment_service: EquipmentManagementServiceInterface = Depends(
         get_equipment_service

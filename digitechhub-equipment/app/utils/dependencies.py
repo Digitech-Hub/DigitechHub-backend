@@ -102,20 +102,34 @@ def require_role(required_role: str):
     return role_checker
 
 
+def provide_equipment_repository() -> EquipmentRepository:
+    return EquipmentRepository()
+
+
+def provide_equipment_status_repository() -> EquipmentStatusRepository:
+    return EquipmentStatusRepository()
+
+
+def provide_rental_history_repository() -> RentalHistoryRepository:
+    return RentalHistoryRepository()
+
+
 def get_equipment_service(
-    equipment_repository=Depends(EquipmentRepository),
-    equipment_status_repository=Depends(EquipmentStatusRepository),
+    equipment_repository=Depends(provide_equipment_repository),
+    equipment_status_repository=Depends(provide_equipment_status_repository),
 ):
     return EquipmentManagementService(equipment_repository, equipment_status_repository)
 
 
 def get_equipment_status_service(
-    equipment_status_repository=Depends(EquipmentStatusRepository),
+    equipment_status_repository=Depends(provide_equipment_status_repository),
 ):
     return EquipmentStatusService(equipment_status_repository)
 
 
-def get_rental_history_service(rental_repository=Depends(RentalHistoryRepository)):
+def get_rental_history_service(
+    rental_repository=Depends(provide_rental_history_repository),
+):
     return RentalHistoryService(rental_repository)
 
 

@@ -64,7 +64,7 @@ def create_success_response(data: Any = None, message: str = "성공") -> Dict[s
     return {"success": True, "message": message, "data": data, "error": None}
 
 
-def create_error_response(message: str, error: str | None) -> Dict[str, Any]:
+def create_error_response(message: str, error: Any | None) -> Dict[str, Any]:
     """에러 응답을 생성합니다."""
     return {
         "success": False,

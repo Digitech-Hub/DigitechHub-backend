@@ -16,6 +16,8 @@ class ResponseFactory:
     @staticmethod
     def success(data: Any = None, message: str = "성공") -> JSONResponse:
         """성공 응답을 생성합니다."""
+        if hasattr(data, "model_dump"):
+            data = data.model_dump()
         return JSONResponse(
             status_code=200, content=create_success_response(data, message)
         )
@@ -25,6 +27,45 @@ class ResponseFactory:
         message: str, status_code: int = 400, error: str | None = None
     ) -> JSONResponse:
         """에러 응답을 생성합니다."""
+        return JSONResponse(
+            status_code=status_code, content=create_error_response(message, error)
+        )
+
+    @staticmethod
+    def fail(
+        message: str,
+        error: str,
+        status_code: int = 200,
+    ) -> JSONResponse:
+        """HTTP 200으로 논리적 실패 형태의 응답을 생성합니다.
+
+        예시 페이로드 형태:
+        {"success": false, "message": "...", "error": "..."}
+        """
+        return JSONResponse(
+            status_code=status_code, content=create_error_response(message, error)
+        )
+
+    @staticmethod
+    def error_detail(
+        message: str,
+        error: Any,
+        status_code: int = 400,
+    ) -> JSONResponse:
+        """에러 상세 객체를 포함한 응답을 생성합니다.
+
+        예시 페이로드 형태:
+        {
+          "success": false,
+          "message": "Failed to retrieve today's timetable",
+          "data": null,
+          "error": {
+            "code": "INFO-200",
+            "reason": "NEIS API error",
+            "detail": "해당하는 데이터가 없습니다."
+          }
+        }
+        """
         return JSONResponse(
             status_code=status_code, content=create_error_response(message, error)
         )

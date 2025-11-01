@@ -29,7 +29,10 @@ class Equipment(AbstractBaseModel):
         comment="기자재 상태 ID",
     )
     equipment_type_id: Mapped[str] = mapped_column(
-        String(36), nullable=False, comment="기자재 유형 ID"
+        String(36),
+        ForeignKey("equipment_types.id"),
+        nullable=False,
+        comment="기자재 유형 ID",
     )
     is_public: Mapped[bool] = mapped_column(
         Boolean, default=True, nullable=False, comment="공개 여부"
