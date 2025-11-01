@@ -29,6 +29,7 @@ func SetupTimetableRoutes(app *fiber.App, timetableHandler *handler.TimetableHan
 	timetables := api.Group("/timetables")
 	
 	// Swagger 문서 엔드포인트
+	app.Get("/docs/*", swagger.HandlerDefault)
 	timetables.Get("/docs/*", swagger.HandlerDefault)
 
 	// @Summary Health Check

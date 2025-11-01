@@ -74,6 +74,16 @@ services:
     read_timeout: 60000
     retries: 5
     routes:
+      - name: equipment-swagger-route
+        strip_path: true
+        paths:
+          - /api/equipments/docs
+        methods:
+          - GET
+          - HEAD
+        protocols:
+          - http
+          - https
       - name: equipment-route
         strip_path: false
         paths:
@@ -126,6 +136,16 @@ services:
     read_timeout: 60000
     retries: 5
     routes:
+      - name: meal-swagger-route
+        strip_path: true
+        paths:
+          - /api/meal/docs
+        methods:
+          - GET
+          - HEAD
+        protocols:
+          - http
+          - https
       - name: meal-route
         strip_path: false
         paths:
@@ -176,6 +196,16 @@ services:
     read_timeout: 60000
     retries: 5
     routes:
+      - name: timetable-swagger-route
+        strip_path: true
+        paths:
+          - /api/timetables/docs
+        methods:
+          - GET
+          - HEAD
+        protocols:
+          - http
+          - https
       - name: timetable-route
         strip_path: false
         paths:
