@@ -80,6 +80,14 @@ services:
           - http
           - https
     plugins:
+      - name: redirect
+        config:
+          status_code: 301
+          regex_uri:
+            - "^(?<path>.+)$"
+            - "${path}/"
+          matches:
+            - "^/api/equipments/(rental-history|admin|rental)$"
       - name: cors
         config:
           origins:
