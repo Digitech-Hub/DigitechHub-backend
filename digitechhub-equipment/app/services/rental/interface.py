@@ -37,7 +37,7 @@ class RentalCreationServiceInterface(Protocol):
 
 
 @runtime_checkable
-class RentalModificaationServiceInterface(Protocol):
+class RentalModificationServiceInterface(Protocol):
     """
     기자재 반납, 대여 기간 연장 등 Equipment 도메인과 Rental History 도메인에
     대한 수정이 이루어지는 서비스 인터페이스입니다.
@@ -85,7 +85,7 @@ class RentalModificaationServiceInterface(Protocol):
 @runtime_checkable
 class RentalServiceInterface(
     RentalCreationServiceInterface,
-    RentalModificaationServiceInterface,
+    RentalModificationServiceInterface,
     Protocol,
 ):
     """

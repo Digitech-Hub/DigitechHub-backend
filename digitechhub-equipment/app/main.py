@@ -22,7 +22,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.models.abstract_base import Base
+from app.routers import admin as admin_router
 from app.routers.equipment import router as equipment_router
+from app.routers.rental import router as rental_router
+from app.routers.rental_history import router as rental_history_router
 from app.schemas.input.rental import ExtendRentalRequest, RentEquipmentRequest
 from app.schemas.output.equipment import EquipmentInfoResponse
 from app.schemas.output.equipment_status import EquipmentStatusInfo
@@ -101,7 +104,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("🛑 Shutting down DigiTech Hub Equipment API...")
 
 
-def create_app() -> FastAPI:
+def create_app(prefix: str = "/api/equipment") -> FastAPI:
     """
     FastAPI 애플리케이션 인스턴스 생성 및 설정
 
@@ -116,6 +119,7 @@ def create_app() -> FastAPI:
         docs_url="/docs",
         redoc_url="/redoc",
         lifespan=lifespan,
+        redirect_slashes=True,
         openapi_tags=[
             {
                 "name": "Equipment Management",
@@ -184,7 +188,10 @@ def setup_routers(app: FastAPI) -> None:
     Args:
         app: FastAPI 애플리케이션 인스턴스
     """
-    # 라우터 등록
+    # 라우터 등록 (더 구체적인 경로부터 등록)
+    app.include_router(rental_history_router)
+    app.include_router(rental_router)
+    app.include_router(admin_router.router)
     app.include_router(equipment_router)
 
 

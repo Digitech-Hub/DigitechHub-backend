@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.equipment_status.impl import EquipmentStatusRepository
 from app.repositories.equipments.impl import EquipmentRepository
 from app.repositories.rental_histories.impl import RentalHistoryRepository
+from app.services.admin import AdminEquipmentService
 from app.services.equipment_status.impl import EquipmentStatusService
 from app.services.equipments.impl import EquipmentManagementService
 from app.services.rental.impl import RentalService
@@ -140,4 +141,14 @@ def get_rental_service(
 ):
     return RentalService(
         rental_history_service, equipment_service, equipment_status_service
+    )
+
+
+def get_admin_service(
+    equipment_repository=Depends(provide_equipment_repository),
+    equipment_status_repository=Depends(provide_equipment_status_repository),
+    rental_history_repository=Depends(provide_rental_history_repository),
+):
+    return AdminEquipmentService(
+        equipment_repository, equipment_status_repository, rental_history_repository
     )

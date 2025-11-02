@@ -1,2 +1,0 @@
-class AdminEquipmentService:
-    pass
