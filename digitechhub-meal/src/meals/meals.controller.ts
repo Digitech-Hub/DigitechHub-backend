@@ -2,7 +2,6 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MealResponseDto } from './dto/meal-response.dto';
 import { MealsService } from './meals.service';
-import { MealResponse } from './types/neis-api.types';
 
 @ApiTags('Meals')
 @Controller('api/meals')
@@ -19,7 +18,7 @@ export class MealsController {
     description: '성공적으로 급식 정보를 반환합니다.',
     type: MealResponseDto,
   })
-  async getTodayLunch(): Promise<MealResponse> {
+  async getTodayLunch(): Promise<MealResponseDto> {
     return await this.mealsService.getTodayLunch();
   }
 
@@ -39,7 +38,7 @@ export class MealsController {
     description: '성공적으로 급식 정보를 반환합니다.',
     type: MealResponseDto,
   })
-  async getMealByDate(@Query('date') date: string): Promise<MealResponse> {
+  async getMealByDate(@Query('date') date: string): Promise<MealResponseDto> {
     return await this.mealsService.getMealByDate(date);
   }
 }

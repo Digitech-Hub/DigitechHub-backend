@@ -14,16 +14,7 @@ services:
     read_timeout: 60000
     retries: 5
     routes:
-      - name: sso-swagger-route
-        strip_path: false
-        paths:
-          - /api/auth/docs
-        methods:
-          - GET
-          - HEAD
-        protocols:
-          - http
-          - https
+      # API routes
       - name: sso-auth-route
         strip_path: false
         paths:
@@ -63,6 +54,50 @@ services:
           credentials: true
           max_age: 3600
 
+  - name: sso-swagger-service
+    host: digitechhub-sso
+    port: 8080
+    protocol: http
+    path: /swagger-ui
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    routes:
+      - name: sso-swagger-route
+        strip_path: true
+        paths:
+          - /api/auth/docs
+          - /api/auth/swagger-ui
+        methods:
+          - GET
+          - HEAD
+          - OPTIONS
+        protocols:
+          - http
+          - https
+
+  - name: sso-openapi-service
+    host: digitechhub-sso
+    port: 8080
+    protocol: http
+    path: /v3/api-docs
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    routes:
+      - name: sso-openapi-route
+        strip_path: true
+        paths:
+          - /api/auth/v3/api-docs
+        methods:
+          - GET
+          - HEAD
+        protocols:
+          - http
+          - https
+
   # Equipment 서비스
   - name: equipment-service
     host: digitechhub-equipment
@@ -74,6 +109,7 @@ services:
     read_timeout: 60000
     retries: 5
     routes:
+      # API routes
       - name: equipment-route
         strip_path: false
         paths:
@@ -115,6 +151,49 @@ services:
           credentials: true
           max_age: 3600
 
+  - name: equipment-swagger-service
+    host: digitechhub-equipment
+    port: 3001
+    protocol: http
+    path: /docs
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    routes:
+      - name: equipment-swagger-route
+        strip_path: true
+        paths:
+          - /api/equipments/docs
+        methods:
+          - GET
+          - HEAD
+          - OPTIONS
+        protocols:
+          - http
+          - https
+
+  - name: equipment-openapi-service
+    host: digitechhub-equipment
+    port: 3001
+    protocol: http
+    path: /openapi.json
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    routes:
+      - name: equipment-openapi-route
+        strip_path: true
+        paths:
+          - /api/equipments/openapi.json
+        methods:
+          - GET
+          - HEAD
+        protocols:
+          - http
+          - https
+
   # Meal 서비스
   - name: meal-service
     host: digitechhub-meal
@@ -126,6 +205,7 @@ services:
     read_timeout: 60000
     retries: 5
     routes:
+      # API routes
       - name: meal-route
         strip_path: false
         paths:
@@ -164,6 +244,49 @@ services:
             - X-Auth-Token
           credentials: true
           max_age: 3600
+
+  - name: meal-swagger-service
+    host: digitechhub-meal
+    port: 3000
+    protocol: http
+    path: /api/meal/docs
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    routes:
+      - name: meal-swagger-route
+        strip_path: true
+        paths:
+          - /api/meals/docs
+        methods:
+          - GET
+          - HEAD
+          - OPTIONS
+        protocols:
+          - http
+          - https
+
+  - name: meal-openapi-service
+    host: digitechhub-meal
+    port: 3000
+    protocol: http
+    path: /api/meal/docs-json
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    routes:
+      - name: meal-openapi-route
+        strip_path: true
+        paths:
+          - /api/meals/docs-json
+        methods:
+          - GET
+          - HEAD
+        protocols:
+          - http
+          - https
 
   # Timetable 서비스
   - name: timetable-service
@@ -214,6 +337,28 @@ services:
             - X-Auth-Token
           credentials: true
           max_age: 3600
+
+  - name: timetable-swagger-service
+    host: digitechhub-timetable
+    port: 3002
+    protocol: http
+    path: /api/timetables/docs
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 5
+    routes:
+      - name: timetable-swagger-route
+        strip_path: true
+        paths:
+          - /api/timetables/docs
+        methods:
+          - GET
+          - HEAD
+          - OPTIONS
+        protocols:
+          - http
+          - https
 
 # 전역 플러그인
 plugins:
