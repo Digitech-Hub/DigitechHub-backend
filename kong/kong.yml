@@ -1,368 +1,136 @@
 _format_version: "3.0"
 _transform: true
 
-# 서비스 정의
 services:
-  # SSO 서비스
+  # 통합 Swagger UI
+  - name: swagger-aggregator
+    host: swagger-aggregator
+    port: 80
+    protocol: http
+    routes:
+      - name: swagger-ui-root
+        paths:
+          - /docs
+          - /docs/
+        strip_path: false
+        preserve_host: false
+        regex_priority: 1
+      
+      - name: swagger-ui-assets
+        paths:
+          - ~/docs/.*
+        strip_path: false
+        preserve_host: false
+        regex_priority: 0
+
+  # SSO Service
   - name: sso-service
     host: digitechhub-sso
     port: 8080
     protocol: http
-    path: /
     connect_timeout: 60000
     write_timeout: 60000
     read_timeout: 60000
     retries: 5
     routes:
-      # API routes
-      - name: sso-auth-route
-        strip_path: false
+      - name: sso-api
         paths:
           - /api/auth
-        methods:
-          - GET
-          - POST
-          - PUT
-          - DELETE
-          - OPTIONS
-        protocols:
-          - http
-          - https
-    plugins:
-      - name: cors
-        config:
-          origins:
-            - "*"
-          methods:
-            - GET
-            - POST
-            - PUT
-            - DELETE
-            - OPTIONS
-            - PATCH
-          headers:
-            - Accept
-            - Accept-Version
-            - Content-Length
-            - Content-MD5
-            - Content-Type
-            - Date
-            - X-Auth-Token
-            - Authorization
-          exposed_headers:
-            - X-Auth-Token
-          credentials: true
-          max_age: 3600
-
-  - name: sso-swagger-service
-    host: digitechhub-sso
-    port: 8080
-    protocol: http
-    path: /swagger-ui
-    connect_timeout: 60000
-    write_timeout: 60000
-    read_timeout: 60000
-    retries: 5
-    routes:
-      - name: sso-swagger-route
-        strip_path: true
+        strip_path: false
+        preserve_host: false
+      
+      - name: sso-docs
         paths:
           - /api/auth/docs
+          - /api/auth/docs/*
           - /api/auth/swagger-ui
-        methods:
-          - GET
-          - HEAD
-          - OPTIONS
-        protocols:
-          - http
-          - https
+          - /api/auth/swagger-ui/*
+        strip_path: false
+        preserve_host: false
 
-  - name: sso-openapi-service
-    host: digitechhub-sso
-    port: 8080
-    protocol: http
-    path: /v3/api-docs
-    connect_timeout: 60000
-    write_timeout: 60000
-    read_timeout: 60000
-    retries: 5
-    routes:
-      - name: sso-openapi-route
-        strip_path: true
-        paths:
-          - /api/auth/v3/api-docs
-        methods:
-          - GET
-          - HEAD
-        protocols:
-          - http
-          - https
-
-  # Equipment 서비스
+  # Equipment Service
   - name: equipment-service
     host: digitechhub-equipment
     port: 3001
     protocol: http
-    path: /
     connect_timeout: 60000
     write_timeout: 60000
     read_timeout: 60000
     retries: 5
     routes:
-      # API routes
-      - name: equipment-route
-        strip_path: false
+      - name: equipment-api
         paths:
           - /api/equipments
-        methods:
-          - GET
-          - POST
-          - PUT 
-          - DELETE
-          - OPTIONS
-          - PATCH
-          - HEAD
-        protocols:
-          - http
-          - https
-    plugins:
-      - name: cors
-        config:
-          origins:
-            - "*"
-          methods:
-            - GET
-            - POST
-            - PUT
-            - DELETE
-            - OPTIONS
-            - PATCH
-          headers:
-            - Accept
-            - Accept-Version
-            - Content-Length
-            - Content-MD5
-            - Content-Type
-            - Date
-            - X-Auth-Token
-            - Authorization
-          exposed_headers:
-            - X-Auth-Token
-          credentials: true
-          max_age: 3600
-
-  - name: equipment-swagger-service
-    host: digitechhub-equipment
-    port: 3001
-    protocol: http
-    path: /docs
-    connect_timeout: 60000
-    write_timeout: 60000
-    read_timeout: 60000
-    retries: 5
-    routes:
-      - name: equipment-swagger-route
-        strip_path: true
+        strip_path: false
+        preserve_host: false
+      
+      - name: equipment-docs
         paths:
           - /api/equipments/docs
-        methods:
-          - GET
-          - HEAD
-          - OPTIONS
-        protocols:
-          - http
-          - https
+        strip_path: false
+        preserve_host: false
 
-  - name: equipment-openapi-service
-    host: digitechhub-equipment
-    port: 3001
-    protocol: http
-    path: /openapi.json
-    connect_timeout: 60000
-    write_timeout: 60000
-    read_timeout: 60000
-    retries: 5
-    routes:
-      - name: equipment-openapi-route
-        strip_path: true
-        paths:
-          - /api/equipments/openapi.json
-        methods:
-          - GET
-          - HEAD
-        protocols:
-          - http
-          - https
-
-  # Meal 서비스
+  # Meal Service
   - name: meal-service
     host: digitechhub-meal
     port: 3000
     protocol: http
-    path: /
     connect_timeout: 60000
     write_timeout: 60000
     read_timeout: 60000
     retries: 5
     routes:
-      # API routes
-      - name: meal-route
-        strip_path: false
+      - name: meal-api
         paths:
           - /api/meals
-        methods:
-          - GET
-          - POST
-          - PUT
-          - DELETE
-          - OPTIONS
-        protocols:
-          - http
-          - https
-    plugins:
-      - name: cors
-        config:
-          origins:
-            - "*"
-          methods:
-            - GET
-            - POST
-            - PUT
-            - DELETE
-            - OPTIONS
-            - PATCH
-          headers:
-            - Accept
-            - Accept-Version
-            - Content-Length
-            - Content-MD5
-            - Content-Type
-            - Date
-            - X-Auth-Token
-            - Authorization
-          exposed_headers:
-            - X-Auth-Token
-          credentials: true
-          max_age: 3600
-
-  - name: meal-swagger-service
-    host: digitechhub-meal
-    port: 3000
-    protocol: http
-    path: /api/meal/docs
-    connect_timeout: 60000
-    write_timeout: 60000
-    read_timeout: 60000
-    retries: 5
-    routes:
-      - name: meal-swagger-route
-        strip_path: true
+        strip_path: false
+        preserve_host: false
+      
+      - name: meal-docs
         paths:
           - /api/meals/docs
-        methods:
-          - GET
-          - HEAD
-          - OPTIONS
-        protocols:
-          - http
-          - https
+        strip_path: false
+        preserve_host: false
 
-  - name: meal-openapi-service
-    host: digitechhub-meal
-    port: 3000
-    protocol: http
-    path: /api/meal/docs-json
-    connect_timeout: 60000
-    write_timeout: 60000
-    read_timeout: 60000
-    retries: 5
-    routes:
-      - name: meal-openapi-route
-        strip_path: true
-        paths:
-          - /api/meals/docs-json
-        methods:
-          - GET
-          - HEAD
-        protocols:
-          - http
-          - https
-
-  # Timetable 서비스
+  # Timetable Service
   - name: timetable-service
     host: digitechhub-timetable
     port: 3002
     protocol: http
-    path: /
     connect_timeout: 60000
     write_timeout: 60000
     read_timeout: 60000
     retries: 5
     routes:
-      - name: timetable-route
-        strip_path: false
+      - name: timetable-api
         paths:
           - /api/timetables
-        methods:
-          - GET
-          - POST
-          - PUT
-          - DELETE
-          - OPTIONS
-        protocols:
-          - http
-          - https
-    plugins:
-      - name: cors
-        config:
-          origins:
-            - "*"
-          methods:
-            - GET
-            - POST
-            - PUT
-            - DELETE
-            - OPTIONS
-            - PATCH
-          headers:
-            - Accept
-            - Accept-Version
-            - Content-Length
-            - Content-MD5
-            - Content-Type
-            - Date
-            - X-Auth-Token
-            - Authorization
-          exposed_headers:
-            - X-Auth-Token
-          credentials: true
-          max_age: 3600
-
-  - name: timetable-swagger-service
-    host: digitechhub-timetable
-    port: 3002
-    protocol: http
-    path: /api/timetables/docs
-    connect_timeout: 60000
-    write_timeout: 60000
-    read_timeout: 60000
-    retries: 5
-    routes:
-      - name: timetable-swagger-route
-        strip_path: true
+        strip_path: false
+        preserve_host: false
+      
+      - name: timetable-docs
         paths:
           - /api/timetables/docs
-        methods:
-          - GET
-          - HEAD
-          - OPTIONS
-        protocols:
-          - http
-          - https
+        strip_path: false
+        preserve_host: false
 
-# 전역 플러그인
 plugins:
-  # Rate Limiting
+  - name: cors
+    config:
+      origins: ["*"]
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+      headers:
+        - Accept
+        - Accept-Version
+        - Content-Length
+        - Content-Type
+        - Date
+        - Authorization
+        - X-Auth-Token
+      exposed_headers: ["X-Auth-Token"]
+      credentials: true
+      max_age: 3600
+
   - name: rate-limiting
     config:
       minute: 100
@@ -371,17 +139,15 @@ plugins:
       fault_tolerant: true
       hide_client_headers: false
 
-  # Request Size Limiting
   - name: request-size-limiting
     config:
       allowed_payload_size: 10
       size_unit: megabytes
       require_content_length: false
 
-  # Request Transformer
   - name: request-transformer
     config:
       add:
         headers:
-          - "X-Forwarded-By: kong"
-          - "X-Gateway: digitechhub"
+          - "X-Forwarded-By:kong"
+          - "X-Gateway:digitechhub"

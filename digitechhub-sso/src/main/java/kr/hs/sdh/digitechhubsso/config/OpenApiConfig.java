@@ -11,10 +11,6 @@ import java.util.List;
 
 @Configuration
 public class OpenApiConfig {
-
-    @Value("${app.domain:http://localhost:8080}")
-    private String domain;
-
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
@@ -23,9 +19,8 @@ public class OpenApiConfig {
                         .version("1.0.0")
                         .description("Digitech Hub Single Sign-On 서비스 API 문서"))
                 .servers(List.of(
-                        new Server().url("http://localhost:8080").description("로컬 개발 서버"),
-                        new Server().url("http://localhost:8000").description("Kong Gateway"),
-                        new Server().url(domain).description("프로덕션 서버")
+                        new Server().url("http://localhost:8000/api/auth").description("Kong Gateway"),
+                        new Server().url("http://localhost:8080").description("로컬 개발 서버")
                 ));
     }
 }
