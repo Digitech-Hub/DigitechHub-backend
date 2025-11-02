@@ -116,8 +116,9 @@ def create_app(prefix: str = "/api/equipment") -> FastAPI:
         title="Digitech Hub Equipment API",
         description="장비 관리 시스템을 위한 마이크로서비스 API",
         version="0.1.0",
-        docs_url="/docs",
-        redoc_url="/redoc",
+        docs_url="/api/equipments/docs",
+        openapi_url="/api/equipments/openapi.json",
+        redoc_url=None,
         lifespan=lifespan,
         redirect_slashes=True,
         openapi_tags=[
@@ -329,7 +330,6 @@ def main() -> None:
 
 # 서버 인스턴스 생성 (ASGI 서버에서 사용)
 app = create_app()
-
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):

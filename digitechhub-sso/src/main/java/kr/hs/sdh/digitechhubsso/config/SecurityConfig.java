@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -41,6 +42,25 @@ public class SecurityConfig {
             
             // 요청 인가 규칙
             .authorizeHttpRequests(authz -> authz
+                // Swagger UI 및 API 문서 (최우선 허용) - AntPathRequestMatcher로 명시적 허용
+                .requestMatchers(
+                    new AntPathRequestMatcher("/api/auth/docs"),
+                    new AntPathRequestMatcher("/api/auth/docs/**"),
+                    new AntPathRequestMatcher("/api/auth/docs/index.html"),
+                    new AntPathRequestMatcher("/api/auth/swagger-ui/**"),
+                    new AntPathRequestMatcher("/api/auth/swagger-ui.html"),
+                    new AntPathRequestMatcher("/api/auth/swagger-ui/index.html"),
+                    new AntPathRequestMatcher("/api/auth/v3/api-docs/**"),
+                    new AntPathRequestMatcher("/swagger-ui/**"),
+                    new AntPathRequestMatcher("/swagger-ui.html"),
+                    new AntPathRequestMatcher("/swagger-ui/index.html"),
+                    new AntPathRequestMatcher("/v3/api-docs/**"),
+                    new AntPathRequestMatcher("/swagger-resources/**"),
+                    new AntPathRequestMatcher("/webjars/**"),
+                    new AntPathRequestMatcher("/docs"),
+                    new AntPathRequestMatcher("/docs/**")
+                ).permitAll()
+                
                 // 공개 엔드포인트
                 .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers("/api/auth/register").permitAll()
@@ -51,6 +71,8 @@ public class SecurityConfig {
                 // 헬스 체크
                 .requestMatchers("/api/auth/health").permitAll()
                 
+                // 에러 페이지
+                .requestMatchers("/error").permitAll()
                 
                 // 기타 모든 요청은 인증 필요
                 .anyRequest().authenticated()
@@ -77,21 +99,23 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // 허용할 오리진 설정
+        // 허용할 오리진 설정 (Kong Gateway 포함)
         configuration.setAllowedOriginPatterns(Arrays.asList(
-            "http://localhost:5173" // React 개발 서버
+            "http://localhost:5173", // React 개발 서버
+            "http://localhost:8000", // Kong Gateway
+            "http://localhost:8080" // 직접 접근
         ));
         
         // 허용할 HTTP 메서드
         configuration.setAllowedMethods(Arrays.asList(
-            "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
+            "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"
         ));
         
         // 허용할 헤더
         configuration.setAllowedHeaders(Arrays.asList(
             "Authorization", "Content-Type", "X-Requested-With", 
             "Accept", "Origin", "Access-Control-Request-Method", 
-            "Access-Control-Request-Headers"
+            "Access-Control-Request-Headers", "X-Auth-Token"
         ));
         
         // 인증 정보 포함 허용

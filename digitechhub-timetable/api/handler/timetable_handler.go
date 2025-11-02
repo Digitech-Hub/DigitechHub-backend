@@ -18,6 +18,10 @@ type TimetableHandler struct {
 	logger  zerolog.Logger
 }
 
+func (h *TimetableHandler) GetOpenAPIDocument() interface{} {
+	panic("unimplemented")
+}
+
 func NewTimetableHandler(service timetable.Service, logger zerolog.Logger) *TimetableHandler {
 	return &TimetableHandler{
 		service: service,
@@ -25,6 +29,13 @@ func NewTimetableHandler(service timetable.Service, logger zerolog.Logger) *Time
 	}
 }
 
+// @Summary Health Check
+// @Description 서비스 상태 확인
+// @Tags Health
+// @Accept json
+// @Produce json
+// @Success 200 {object} presenter.APIResponse
+// @Router /api/timetables/health [get]
 func (h *TimetableHandler) GetStatus(c *fiber.Ctx) error {
 	return c.JSON(presenter.APIResponse{
 		Success: true,
@@ -32,6 +43,17 @@ func (h *TimetableHandler) GetStatus(c *fiber.Ctx) error {
 	})
 }
 
+// @Summary 주간 시간표 조회
+// @Description 현재 주의 시간표를 조회합니다
+// @Tags Timetable
+// @Accept json
+// @Produce json
+// @Param grade query int true "학년 (1-3)"
+// @Param class query int true "반 (1-20)"
+// @Success 200 {object} presenter.APIResponse
+// @Failure 400 {object} presenter.APIResponse
+// @Failure 500 {object} presenter.APIResponse
+// @Router /api/timetables/week [get]
 func (h *TimetableHandler) GetThisWeekTimetables(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -58,7 +80,20 @@ func (h *TimetableHandler) GetThisWeekTimetables(c *fiber.Ctx) error {
 	})
 }
 
-// GetTimetableBySpecificDay - 특정 일의 시간표를 가져오는 핸들러
+// @Summary 특정 요일 시간표 조회
+// @Description 특정 요일의 시간표를 조회합니다
+// @Tags Timetable
+// @Accept json
+// @Produce json
+// @Param grade query int true "학년 (1-3)"
+// @Param class query int true "반 (1-20)"
+// @Param day query string true "요일" Enums(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY)
+// @Param semester query string false "학기" Enums(FIRST, SECOND)
+// @Param year query int false "학년도" default(2025)
+// @Success 200 {object} presenter.APIResponse
+// @Failure 400 {object} presenter.APIResponse
+// @Failure 500 {object} presenter.APIResponse
+// @Router /api/timetables/day [get]
 func (h *TimetableHandler) GetTimetableBySpecificDay(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -111,7 +146,19 @@ func (h *TimetableHandler) GetTimetableBySpecificDay(c *fiber.Ctx) error {
 	})
 }
 
-// GetTodayTimetable - 오늘의 시간표를 가져오는 핸들러
+// @Summary 오늘 시간표 조회
+// @Description 오늘의 시간표를 조회합니다
+// @Tags Timetable
+// @Accept json
+// @Produce json
+// @Param grade query int true "학년 (1-3)"
+// @Param class query int true "반 (1-20)"
+// @Param semester query string false "학기" Enums(FIRST, SECOND)
+// @Param year query int false "학년도" default(2025)
+// @Success 200 {object} presenter.APIResponse
+// @Failure 400 {object} presenter.APIResponse
+// @Failure 500 {object} presenter.APIResponse
+// @Router /api/timetables/today [get]
 func (h *TimetableHandler) GetTodayTimetable(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

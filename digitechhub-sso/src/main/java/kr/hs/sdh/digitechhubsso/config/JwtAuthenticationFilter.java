@@ -33,6 +33,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        log.debug("JWT Filter 체크: path={}", path);
+        // Swagger UI 및 API 문서 경로는 필터 건너뛰기
+        boolean shouldSkip = path.startsWith("/api/auth/docs") ||
+               path.startsWith("/api/auth/swagger-ui") ||
+               path.startsWith("/api/auth/v3/api-docs") ||
+               path.startsWith("/swagger-ui") ||
+               path.startsWith("/v3/api-docs") ||
+               path.startsWith("/swagger-resources") ||
+               path.startsWith("/webjars") ||
+               path.equals("/docs") ||
+               path.startsWith("/docs/") ||
+               path.equals("/error");
+        if (shouldSkip) {
+            log.debug("JWT Filter 건너뜀: path={}", path);
+        }
+        return shouldSkip;
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {

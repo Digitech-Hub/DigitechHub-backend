@@ -2,9 +2,11 @@ package routes
 
 import (
 	"digitechhub-timetable/api/handler"
+	"digitechhub-timetable/docs"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
+	"github.com/swaggo/swag"
 )
 
 // @title Digitech Hub Timetable API
@@ -27,60 +29,31 @@ func SetupTimetableRoutes(app *fiber.App, timetableHandler *handler.TimetableHan
 	api := app.Group("/api")
 
 	timetables := api.Group("/timetables")
-	
+
 	// Swagger 문서 엔드포인트
-	timetables.Get("/docs/*", swagger.HandlerDefault)
+	// 더 구체적인 경로(/docs-json)를 먼저 등록
+	timetables.Get("/docs-json", func(c *fiber.Ctx) error {
+		c.Set("Content-Type", "application/json")
+		swaggerJSON, err := swag.ReadDoc(docs.SwaggerInfo.InstanceName())
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{
+				"error": "Failed to read swagger docs",
+			})
+		}
+		return c.SendString(swaggerJSON)
+	})
+	// Swagger UI 정적 리소스를 제공하기 위해 와일드카드 경로 사용
+	timetables.Get("/docs/*", swagger.New(swagger.Config{
+		URL:         "/api/timetables/docs-json",
+		DeepLinking: true,
+	}))
+	timetables.Get("/docs", swagger.New(swagger.Config{
+		URL:         "/api/timetables/docs-json",
+		DeepLinking: true,
+	}))
 
-	// @Summary Health Check
-	// @Description 서비스 상태 확인
-	// @Tags Health
-	// @Accept json
-	// @Produce json
-	// @Success 200 {object} presenter.APIResponse
-	// @Router /timetables/health [get]
 	timetables.Get("/health", timetableHandler.GetStatus)
-
-	// @Summary 주간 시간표 조회
-	// @Description 현재 주의 시간표를 조회합니다
-	// @Tags Timetable
-	// @Accept json
-	// @Produce json
-	// @Param grade query int true "학년 (1-3)"
-	// @Param class query int true "반 (1-20)"
-	// @Success 200 {object} presenter.APIResponse{data=[]timetable.SubjectInfo}
-	// @Failure 400 {object} presenter.APIResponse
-	// @Failure 500 {object} presenter.APIResponse
-	// @Router /timetables/week [get]
 	timetables.Get("/week", timetableHandler.GetThisWeekTimetables)
-
-	// @Summary 특정 요일 시간표 조회
-	// @Description 특정 요일의 시간표를 조회합니다
-	// @Tags Timetable
-	// @Accept json
-	// @Produce json
-	// @Param grade query int true "학년 (1-3)"
-	// @Param class query int true "반 (1-20)"
-	// @Param day query string true "요일" Enums(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY)
-	// @Param semester query string false "학기" Enums(FIRST, SECOND)
-	// @Param year query int false "학년도" default(2025)
-	// @Success 200 {object} presenter.APIResponse{data=[]timetable.SubjectInfo}
-	// @Failure 400 {object} presenter.APIResponse
-	// @Failure 500 {object} presenter.APIResponse
-	// @Router /timetables/day [get]
 	timetables.Get("/day", timetableHandler.GetTimetableBySpecificDay)
-
-	// @Summary 오늘 시간표 조회
-	// @Description 오늘의 시간표를 조회합니다
-	// @Tags Timetable
-	// @Accept json
-	// @Produce json
-	// @Param grade query int true "학년 (1-3)"
-	// @Param class query int true "반 (1-20)"
-	// @Param semester query string false "학기" Enums(FIRST, SECOND)
-	// @Param year query int false "학년도" default(2025)
-	// @Success 200 {object} presenter.APIResponse{data=[]timetable.SubjectInfo}
-	// @Failure 400 {object} presenter.APIResponse
-	// @Failure 500 {object} presenter.APIResponse
-	// @Router /timetables/today [get]
 	timetables.Get("/today", timetableHandler.GetTodayTimetable)
 }

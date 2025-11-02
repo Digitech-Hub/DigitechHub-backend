@@ -4,6 +4,9 @@ FROM golang:1.24-alpine AS builder
 # Install git and ca-certificates
 RUN apk add --no-cache git ca-certificates
 
+# Install swag for Swagger generation
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+
 # Set working directory
 WORKDIR /app
 
@@ -15,6 +18,9 @@ RUN go mod download
 
 # Copy source code
 COPY . .
+
+# Generate Swagger docs
+RUN swag init -g main.go -d .
 
 # Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo .
