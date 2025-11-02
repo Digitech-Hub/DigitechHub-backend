@@ -18,6 +18,10 @@ type TimetableHandler struct {
 	logger  zerolog.Logger
 }
 
+func (h *TimetableHandler) GetOpenAPIDocument() interface{} {
+	panic("unimplemented")
+}
+
 func NewTimetableHandler(service timetable.Service, logger zerolog.Logger) *TimetableHandler {
 	return &TimetableHandler{
 		service: service,

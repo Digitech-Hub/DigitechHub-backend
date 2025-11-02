@@ -12,8 +12,12 @@ async function bootstrap() {
     .setVersion('1.0.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
-  SwaggerModule.setup('api/meal/docs', app, document); // Kong Gateway 경로
+  // Kong Gateway 접근용
+  SwaggerModule.setup('/api/meals/docs', app, document, {
+    swaggerOptions: {
+      url: '/api/meals/docs-json', // 반드시 Gateway 기준
+    },
+  });
 
   await app.listen(process.env.PORT ?? 3000);
 }

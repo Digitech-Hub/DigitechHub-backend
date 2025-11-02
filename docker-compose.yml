@@ -82,6 +82,9 @@ services:
       APP_FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
       JWT_PRIVATE_KEY_PATH: /app/keys/private_key.pem
       JWT_PUBLIC_KEY_PATH: /app/keys/public_key.pem
+      SPRINGDOC_API_DOCS_PATH: /api/auth/v3/api-docs
+      SPRINGDOC_SWAGGER_UI_PATH: /api/auth/docs
+      SPRINGDOC_SHOW_ACTUATOR: false
     ports:
       - "8080:8080"
     volumes:
@@ -180,9 +183,8 @@ services:
 
   # Kong Gateway (DB-less 모드)
   kong:
-    image: kong:3.4
+    image: kong:3.5
     container_name: kong-gateway
-    platform: linux/amd64
     depends_on:
       - digitechhub-sso
       - digitechhub-meal
@@ -192,7 +194,6 @@ services:
       # DB-less 모드 설정
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /usr/local/kong/kong.yml
-      
       # 로그 설정
       KONG_PROXY_ACCESS_LOG: /dev/stdout
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
@@ -219,7 +220,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-
+      
 networks:
   digitechhub-net:
     driver: bridge
